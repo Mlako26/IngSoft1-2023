@@ -81,12 +81,12 @@ test8MoveBackwardsFromAnywhere
 	self assert: rover position equals: 1 @ 3.
 ! !
 
-!MarsRoverTests methodsFor: 'as yet unclassified' stamp: 'natan 10/10/2023 16:37:48'!
+!MarsRoverTests methodsFor: 'as yet unclassified' stamp: 'natan 10/10/2023 17:04:12'!
 test9ExecuteCommands
 	| rover commands | 
 	rover := MarsRover at: 0 @ 0 direction: $E.
 	
-	commands := 'lffrrb'."xbblllrfff'"
+	commands := 'lffrrbxbblllrfff'.
 	rover executeCommands: commands.
 		
 	self assert: rover position equals: 0 @ 3.
@@ -95,32 +95,32 @@ test9ExecuteCommands
 
 !classDefinition: #MarsRover category: 'Mars-Rover-Exercise'!
 Object subclass: #MarsRover
-	instanceVariableNames: 'coordinate directionState'
+	instanceVariableNames: 'coordinate directionState commandTable'
 	classVariableNames: ''
 	poolDictionaries: ''
 	category: 'Mars-Rover-Exercise'!
 
-!MarsRover methodsFor: 'initialization' stamp: 'natan 10/10/2023 15:31:03'!
+!MarsRover methodsFor: 'initialization' stamp: 'natan 10/10/2023 17:03:16'!
 initializeAt: aCoordinate direction: aCardinalDirection 
 	coordinate := aCoordinate.
-	directionState := MarsRoverDirectionState stateFor: aCardinalDirection.! !
+	directionState := MarsRoverDirectionState stateFor: aCardinalDirection.
+	
+	commandTable := Dictionary new.				
+	commandTable add: $l->[self rotateCounterClockwise];
+				 add: $r->[self rotateClockwise];
+				 add: $f->[self moveForward];
+				 add: $b->[self moveBackwards].! !
 
 
 !MarsRover methodsFor: 'as yet unclassified' stamp: 'natan 10/10/2023 15:37:40'!
 direction
 	^directionState direction.! !
 
-!MarsRover methodsFor: 'as yet unclassified' stamp: 'natan 10/10/2023 16:49:57'!
+!MarsRover methodsFor: 'as yet unclassified' stamp: 'natan 10/10/2023 17:05:40'!
 executeCommands: commands 
-	| commandTable | 
-	commandTable := Dictionary new.				
-	commandTable add: $l->[self rotateCounterClockwise];
-				 add: $r->[self rotateClockwise];
-				 add: $f->[self moveForward];
-				 add: $b->[self moveBackwards].
 	
 	commands do:[:command | 
-		(commandTable at: (command)  ifAbsent:[[^self]]) value	].! !
+		(commandTable at: command ifAbsent:[ [^self] ]) value	].! !
 
 !MarsRover methodsFor: 'as yet unclassified' stamp: 'natan 10/10/2023 16:11:28'!
 moveBackwards
