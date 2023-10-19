@@ -253,8 +253,8 @@ test10GetAllTransactions
 	self assert: (OrderedCollection with: aTransaction) equals: (aPortfolio transactions)
 		! !
 
-!TestPortfolio methodsFor: 'as yet unclassified' stamp: 'natan 10/19/2023 19:11:55'!
-test11HolaManuSosMuySexy
+!TestPortfolio methodsFor: 'as yet unclassified' stamp: 'MLNV 10/19/2023 20:22:20'!
+test11CantAddPortfolioWithAnySameRecord
 
 	| aPortfolio aSecondPortfolio anAccount|
 	
@@ -462,9 +462,10 @@ includes: aFinancialRecordToCheck
 
 	^records anySatisfy: [:aFinancialRecord | aFinancialRecord includes: aFinancialRecordToCheck].! !
 
-!Portfolio methodsFor: 'private' stamp: 'natan 10/19/2023 19:02:20'!
+!Portfolio methodsFor: 'private' stamp: 'MLNV 10/19/2023 20:24:03'!
 intersect: aFinancialRecordToCheck
-	^records anySatisfy: [:aFinancialRecord | aFinancialRecord intersect: aFinancialRecordToCheck].! !
+
+	^records anySatisfy: [:aRecord | aRecord intersect: aFinancialRecordToCheck].! !
 
 !Portfolio methodsFor: 'private' stamp: 'natan 10/19/2023 19:09:23'!
 rootsIntersect: aFinancialRecordToCheck
