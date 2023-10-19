@@ -395,6 +395,11 @@ FinancialRecords subclass: #Portfolio
 	poolDictionaries: ''
 	category: 'Portfolio-Ejercicio'!
 
+!Portfolio methodsFor: 'transactions' stamp: 'MLNV 10/18/2023 09:06:32'!
+addTransactionsInto: aTransactionList
+
+	records do: [:aFinancialRecord | aFinancialRecord addTransactionsInto: aTransactionList].! !
+
 !Portfolio methodsFor: 'transactions' stamp: 'MLNV 10/17/2023 01:11:27'!
 balance
 
@@ -405,14 +410,16 @@ hasRegistered: aTransaction
 	
 	^records anySatisfy: [:aFinancialRecord | aFinancialRecord hasRegistered: aTransaction].! !
 
-!Portfolio methodsFor: 'transactions' stamp: 'MLNV 10/17/2023 01:11:27'!
+!Portfolio methodsFor: 'transactions' stamp: 'MLNV 10/18/2023 09:06:44'!
 transactions
 	
-	^records 
-		inject: OrderedCollection new
-		into: [:transactions :aFinancialRecord |
-				transactions addAll: aFinancialRecord transactions; yourself.
-			].! !
+	| allTransactions |
+	
+	allTransactions := OrderedCollection new.
+	
+	self addTransactionsInto: allTransactions.
+	
+	^allTransactions. ! !
 
 
 !Portfolio methodsFor: 'addRecords' stamp: 'MLNV 10/17/2023 01:11:27'!
@@ -477,6 +484,11 @@ initialize
 
 	transactions := OrderedCollection new.! !
 
+
+!ReceptiveAccount methodsFor: 'transactions' stamp: 'MLNV 10/18/2023 09:05:19'!
+addTransactionsInto: aTransactionsList
+	
+	aTransactionsList addAll: transactions.! !
 
 !ReceptiveAccount methodsFor: 'transactions' stamp: 'MC 10/9/2023 21:50:05'!
 register: aTransaction
