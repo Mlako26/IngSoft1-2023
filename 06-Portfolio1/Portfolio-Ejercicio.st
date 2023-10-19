@@ -253,6 +253,27 @@ test10GetAllTransactions
 	self assert: (OrderedCollection with: aTransaction) equals: (aPortfolio transactions)
 		! !
 
+!TestPortfolio methodsFor: 'as yet unclassified' stamp: 'natan 10/19/2023 19:11:55'!
+test11HolaManuSosMuySexy
+
+	| aPortfolio aSecondPortfolio anAccount|
+	
+	aPortfolio := Portfolio new.
+	aSecondPortfolio := Portfolio new.
+
+	anAccount := ReceptiveAccount  new.
+	Deposit register: 200 on: anAccount.
+	aPortfolio add: anAccount.
+	
+	aSecondPortfolio add: anAccount.
+
+	self
+		should: [aPortfolio add: aSecondPortfolio.]
+		raise: Error
+		withExceptionDo: [ :anError |
+			self assert: anError messageText = Portfolio alreadyInPortfolioErrorDescription].
+		! !
+
 
 !classDefinition: #AccountTransaction category: 'Portfolio-Ejercicio'!
 Object subclass: #AccountTransaction
@@ -422,10 +443,10 @@ transactions
 	^allTransactions. ! !
 
 
-!Portfolio methodsFor: 'addRecords' stamp: 'MLNV 10/17/2023 01:11:27'!
+!Portfolio methodsFor: 'addRecords' stamp: 'natan 10/19/2023 19:07:02'!
 add: aFinancialRecord 
 	
-	(self rootsInclude: aFinancialRecord) ifTrue: [self error: self class alreadyInPortfolioErrorDescription].
+	(self rootsIntersect: aFinancialRecord) ifTrue: [self error: self class alreadyInPortfolioErrorDescription].
 	
 	records add: aFinancialRecord .
 	aFinancialRecord addFather: self.! !
@@ -441,12 +462,16 @@ includes: aFinancialRecordToCheck
 
 	^records anySatisfy: [:aFinancialRecord | aFinancialRecord includes: aFinancialRecordToCheck].! !
 
-!Portfolio methodsFor: 'private' stamp: 'MLNV 10/17/2023 00:39:20'!
-rootsInclude: aFinancialRecordToCheck
+!Portfolio methodsFor: 'private' stamp: 'natan 10/19/2023 19:02:20'!
+intersect: aFinancialRecordToCheck
+	^records anySatisfy: [:aFinancialRecord | aFinancialRecord intersect: aFinancialRecordToCheck].! !
+
+!Portfolio methodsFor: 'private' stamp: 'natan 10/19/2023 19:09:23'!
+rootsIntersect: aFinancialRecordToCheck
 
 	^fathers isEmpty 
-		ifTrue: [self includes: aFinancialRecordToCheck .]
-		ifFalse: [fathers anySatisfy: [:aFinancialRecord | aFinancialRecord rootsInclude: aFinancialRecordToCheck]].! !
+		ifTrue: [self intersect: aFinancialRecordToCheck .]
+		ifFalse: [fathers anySatisfy: [:aFinancialRecord | aFinancialRecord rootsIntersect: aFinancialRecordToCheck]].! !
 
 
 !Portfolio methodsFor: 'initialization' stamp: 'MLNV 10/17/2023 01:11:27'!
@@ -525,6 +550,14 @@ addFather: aFinancialRecord
 includes: aFinancialRecord
 
 	^aFinancialRecord = self.
+	
+	
+					! !
+
+!ReceptiveAccount methodsFor: 'private' stamp: 'natan 10/19/2023 19:02:46'!
+intersect: aFinancialRecord
+
+	^aFinancialRecord includes: self.
 	
 	
 					! !
