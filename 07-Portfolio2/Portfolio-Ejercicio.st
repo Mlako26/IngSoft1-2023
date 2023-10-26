@@ -634,6 +634,42 @@ test19TransactionsTreeForPortfolioWithTransactions
 	
 	 ! !
 
+!ReportTest methodsFor: 'tests' stamp: 'natanvek 10/26/2023 17:35:58'!
+test20TransactionsTreeErrorForAccounts
+	| anAccount | 	
+	anAccount := ReceptiveAccount named: 'account'.
+	Deposit register: 100 on: anAccount. 
+
+	self
+		should: [RecordTransactionsTree for: anAccount]
+		raise: Error
+		withExceptionDo: [ :anError |
+			self assert: anError messageText = RecordTransactionsTree reportOnlyForPortfolios ].
+				
+	
+		
+
+	
+	 ! !
+
+!ReportTest methodsFor: 'tests' stamp: 'natanvek 10/26/2023 17:35:34'!
+test21NameTreeErrorForAccounts
+	| anAccount | 	
+	anAccount := ReceptiveAccount named: 'account'.
+	Deposit register: 100 on: anAccount. 
+
+	self
+		should: [PortfolioNameTree for: anAccount]
+		raise: Error
+		withExceptionDo: [ :anError |
+			self assert: anError messageText = PortfolioNameTree reportOnlyForPortfolios ].
+				
+	
+		
+
+	
+	 ! !
+
 
 !classDefinition: #AccountOperation category: 'Portfolio-Ejercicio'!
 Object subclass: #AccountOperation
@@ -1136,6 +1172,16 @@ for: aFinancialRecord
 
 	^self new initializeFor: aFinancialRecord.! !
 
+!Report class methodsFor: 'instance creation' stamp: 'natanvek 10/26/2023 16:58:51'!
+forPrivate: aFinancialRecord
+
+	^self new initializeFor: aFinancialRecord.! !
+
+
+!Report class methodsFor: 'as yet unclassified' stamp: 'natanvek 10/26/2023 17:17:22'!
+reportOnlyForPortfolios
+	^ 'Este reporte solo puede ser usado por portfolios'! !
+
 
 !classDefinition: #AccountSummary category: 'Portfolio-Ejercicio'!
 Report subclass: #AccountSummary
@@ -1196,18 +1242,30 @@ generate
 !PortfolioNameTree methodsFor: 'report generation' stamp: 'natanvek 10/26/2023 15:49:37'!
 generateAccountReport: anAccount	^self! !
 
-!PortfolioNameTree methodsFor: 'report generation' stamp: 'MLNV 10/26/2023 13:31:16'!
+!PortfolioNameTree methodsFor: 'report generation' stamp: 'natanvek 10/26/2023 17:13:16'!
 generateSubtreeReport: aFinancialRecord
 
 	| subtreeReport |
 
-	subtreeReport := (self class for: aFinancialRecord) generate.
+	subtreeReport := (self class forPrivate: aFinancialRecord) generate.
 	subtreeReport := (subtreeReport collect:[:aReportEntry | '    ', aReportEntry]).
 	report addAll: subtreeReport.
 	
 	
 	
 	! !
+
+"-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
+
+!classDefinition: 'PortfolioNameTree class' category: 'Portfolio-Ejercicio'!
+PortfolioNameTree class
+	instanceVariableNames: ''!
+
+!PortfolioNameTree class methodsFor: 'as yet unclassified' stamp: 'natanvek 10/26/2023 17:33:04'!
+for: aPortfolio
+
+	(aPortfolio isKindOf: Portfolio) ifFalse: [self error: (self reportOnlyForPortfolios)].
+	^ super for: aPortfolio! !
 
 
 !classDefinition: #RecordTransactionsTree category: 'Portfolio-Ejercicio'!
@@ -1217,7 +1275,7 @@ Report subclass: #RecordTransactionsTree
 	poolDictionaries: ''
 	category: 'Portfolio-Ejercicio'!
 
-!RecordTransactionsTree methodsFor: 'as yet unclassified' stamp: 'natanvek 10/26/2023 16:31:49'!
+!RecordTransactionsTree methodsFor: 'report generation' stamp: 'natanvek 10/26/2023 16:31:49'!
 generate
 
 	report := OrderedCollection with: (financialRecord name).
@@ -1227,26 +1285,38 @@ generate
 
 	! !
 
-!RecordTransactionsTree methodsFor: 'as yet unclassified' stamp: 'natanvek 10/26/2023 16:35:54'!
+!RecordTransactionsTree methodsFor: 'report generation' stamp: 'natanvek 10/26/2023 17:12:56'!
 generateAccountReport: anAccount
 
 	| accountSummary |
-	accountSummary := (AccountSummary for: anAccount) generate.
+	accountSummary := (AccountSummary forPrivate: anAccount) generate.
 	accountSummary removeLast.
 	report addAll: (accountSummary collect:[:aReportEntry | '    ', aReportEntry]).
 ! !
 
-!RecordTransactionsTree methodsFor: 'as yet unclassified' stamp: 'natanvek 10/26/2023 16:28:53'!
+!RecordTransactionsTree methodsFor: 'report generation' stamp: 'natanvek 10/26/2023 17:13:04'!
 generateSubtreeReport: aFinancialRecord
 
 	| subtreeReport |
 
-	subtreeReport := (self class for: aFinancialRecord) generate.
+	subtreeReport := (self class forPrivate: aFinancialRecord) generate.
 	
  	subtreeReport := (subtreeReport collect:[:aReportEntry | '    ', aReportEntry]).
 	report addAll: subtreeReport.
 	
 ! !
+
+"-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
+
+!classDefinition: 'RecordTransactionsTree class' category: 'Portfolio-Ejercicio'!
+RecordTransactionsTree class
+	instanceVariableNames: ''!
+
+!RecordTransactionsTree class methodsFor: 'as yet unclassified' stamp: 'natanvek 10/26/2023 17:34:28'!
+for: aPortfolio
+
+	(aPortfolio isKindOf: Portfolio) ifFalse: [self error: self reportOnlyForPortfolios].
+	^ super for: aPortfolio! !
 
 
 !classDefinition: #TransferNet category: 'Portfolio-Ejercicio'!
