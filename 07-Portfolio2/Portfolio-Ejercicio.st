@@ -496,18 +496,18 @@ test13NameTreeForEmptyPortfolio
 	
 	 ! !
 
-!ReportTest methodsFor: 'tests' stamp: 'MLNV 10/26/2023 09:59:10'!
+!ReportTest methodsFor: 'tests' stamp: 'natanvek 10/26/2023 16:08:04'!
 test14NameTreeForPortfolioWithManyAccounts
 
-	| portfolio account report |
+	| portfolioDeAntonella cuentaDeMessi report |
 	
-	account := ReceptiveAccount named: 'Cuenta de Messi'.
-	portfolio := Portfolio named: 'Portfolio de Antonella' with: account.
+	cuentaDeMessi := ReceptiveAccount named: 'Cuenta de Messi'.
+	portfolioDeAntonella := Portfolio named: 'Portfolio de Antonella' with: cuentaDeMessi.
 	report := OrderedCollection 
 			with: 'Portfolio de Antonella'
 			with: '    Cuenta de Messi'.
 	
-	self assert: (PortfolioNameTree for: portfolio) generate equals: report.
+	self assert: (PortfolioNameTree for: portfolioDeAntonella) generate equals: report.
 				
 	
 		
@@ -515,21 +515,21 @@ test14NameTreeForPortfolioWithManyAccounts
 	
 	 ! !
 
-!ReportTest methodsFor: 'tests' stamp: 'MLNV 10/26/2023 09:59:01'!
+!ReportTest methodsFor: 'tests' stamp: 'natanvek 10/26/2023 16:11:48'!
 test15NameTreeForAnidatedPortfolios
 
-	| aPortfolio aSecondPortfolio account report |
+	| portfolioFutbol portfolioDeAntonella cuentaDeMessi report |
 	
-	account := ReceptiveAccount named: 'Cuenta de Messi'.
-	aSecondPortfolio := Portfolio named: 'Portfolio de Antonella' with: account.
-	aPortfolio := Portfolio named: 'Portfolio futbol' with: aSecondPortfolio.
+	cuentaDeMessi := ReceptiveAccount named: 'Cuenta de Messi'.
+	portfolioDeAntonella := Portfolio named: 'Portfolio de Antonella' with: cuentaDeMessi.
+	portfolioFutbol := Portfolio named: 'Portfolio futbol' with: portfolioDeAntonella.
 	report := OrderedCollection 
 			with: 'Portfolio futbol'
 			with: '    Portfolio de Antonella'
 			with: '        Cuenta de Messi'.
 
 	
-	self assert: (PortfolioNameTree for: aPortfolio) generate equals: report.
+	self assert: (PortfolioNameTree for: portfolioFutbol) generate equals: report.
 				
 	
 		
@@ -537,16 +537,16 @@ test15NameTreeForAnidatedPortfolios
 	
 	 ! !
 
-!ReportTest methodsFor: 'tests' stamp: 'MLNV 10/26/2023 10:03:18'!
+!ReportTest methodsFor: 'tests' stamp: 'natanvek 10/26/2023 16:10:39'!
 test16NameTreeForPortfolioWithTransactions
 
-	| aPortfolio aSecondPortfolio anAccount anotherAccount report |
+	| portfolioDeAntonella portfolioFutbol cuentaDeMessi cuentaDeScaloni report |
 	
-	anAccount := ReceptiveAccount named: 'Cuenta de Messi'.
-	anotherAccount := ReceptiveAccount named: 'Cuenta de Scaloni'.
-	Deposit register: 100 on: anAccount.
-	aSecondPortfolio := Portfolio named: 'Portfolio de Antonella' with: anAccount.
-	aPortfolio := Portfolio named: 'Portfolio futbol' with: aSecondPortfolio with: anotherAccount.
+	cuentaDeMessi := ReceptiveAccount named: 'Cuenta de Messi'.
+	cuentaDeScaloni := ReceptiveAccount named: 'Cuenta de Scaloni'.
+	Deposit register: 100 on: cuentaDeMessi.
+	portfolioDeAntonella := Portfolio named: 'Portfolio de Antonella' with: cuentaDeMessi.
+	portfolioFutbol := Portfolio named: 'Portfolio futbol' with: portfolioDeAntonella with: cuentaDeScaloni.
 	
 	report := OrderedCollection 
 			with: 'Portfolio futbol'
@@ -555,7 +555,78 @@ test16NameTreeForPortfolioWithTransactions
 			with: '    Cuenta de Scaloni'.
 
 	
-	self assert: (PortfolioNameTree for: aPortfolio) generate equals: report.
+	self assert: (PortfolioNameTree for: portfolioFutbol) generate equals: report.
+				
+	
+		
+
+	
+	 ! !
+
+!ReportTest methodsFor: 'tests' stamp: 'natanvek 10/26/2023 16:32:08'!
+test17TransactionsTreeForEmptyPortfolio
+
+	| portfolio  report |
+	
+	portfolio := Portfolio new.
+	portfolio setName: 'Portfolio de test vacio'.
+	report := OrderedCollection with: 'Portfolio de test vacio' with: '    Balance = 0'.
+	
+	self assert: (RecordTransactionsTree for: portfolio) generate equals: report.
+				! !
+
+!ReportTest methodsFor: 'tests' stamp: 'natanvek 10/26/2023 16:32:14'!
+test18TransactionsTreeForPortfolioWithManyAccounts
+
+	| portfolioDeAntonella cuentaDeMessi report |
+	
+	cuentaDeMessi := ReceptiveAccount named: 'Cuenta de Messi'.
+	portfolioDeAntonella := Portfolio named: 'Portfolio de Antonella' with: cuentaDeMessi.
+	report := OrderedCollection 
+			with: 'Portfolio de Antonella'
+			with: '    Cuenta de Messi'
+			with: '        Balance = 0'
+			with: '    Balance = 0'.
+	
+	self assert: (RecordTransactionsTree for: portfolioDeAntonella) generate equals: report.
+				
+	
+		
+
+	
+	 ! !
+
+!ReportTest methodsFor: 'tests' stamp: 'natanvek 10/26/2023 16:38:46'!
+test19TransactionsTreeForPortfolioWithTransactions
+
+	| portfolioDeAntonella portfolioFutbol cuentaDeMessi cuentaDeScaloni report |
+	
+	cuentaDeMessi := ReceptiveAccount named: 'Cuenta de Messi'.
+	cuentaDeScaloni := ReceptiveAccount named: 'Cuenta de Scaloni'.
+	portfolioDeAntonella := Portfolio named: 'Portfolio de Antonella' with: cuentaDeMessi.
+	portfolioFutbol := Portfolio named: 'Portfolio futbol' with: portfolioDeAntonella with: cuentaDeScaloni.
+	
+	Deposit register: 100 on: cuentaDeMessi.
+	Withdraw register: 50 on: cuentaDeMessi.
+	Transfer register: 30 from: cuentaDeMessi  to: cuentaDeScaloni. 
+	
+	report := OrderedCollection new.
+			
+	report add:  'Portfolio futbol'.
+	report add:  '    Portfolio de Antonella'.
+	report add:  '        Cuenta de Messi'.
+	report add:  '            Depósito por 100.'.
+	report add:  '            Extracción por 50.'.
+	report add:  '            Salida por transferencia de 30.'.
+	report add:  '            Balance = 20'.
+	report add:  '        Balance = 20'.
+	report add:  '    Cuenta de Scaloni'.
+	report add:  '        Entrada por transferencia de 30.'.
+	report add:  '        Balance = 30'.
+	report add:  '    Balance = 50'.
+
+	
+	self assert: (RecordTransactionsTree for: portfolioFutbol) generate equals: report.
 				
 	
 		
@@ -868,8 +939,13 @@ initialize
 	fathers := OrderedCollection new.! !
 
 
-!Portfolio methodsFor: 'report generation' stamp: 'MLNV 10/26/2023 13:31:16'!
-generateReport: aReport 
+!Portfolio methodsFor: 'report generation' stamp: 'natanvek 10/26/2023 15:26:02'!
+generateReportForAccounts: aReport 
+	
+	records do: [:aFinancialRecord | aReport generateSubtreeReport: aFinancialRecord]! !
+
+!Portfolio methodsFor: 'report generation' stamp: 'natanvek 10/26/2023 15:24:46'!
+generateReportForTransactions: aReport 
 	
 	records do: [:aFinancialRecord | aReport generateSubtreeReport: aFinancialRecord]! !
 
@@ -981,8 +1057,12 @@ hasRegistered: aTransaction
 ! !
 
 
-!ReceptiveAccount methodsFor: 'report generation' stamp: 'MLNV 10/26/2023 13:36:24'!
-generateReport: aReport
+!ReceptiveAccount methodsFor: 'report generation' stamp: 'natanvek 10/26/2023 15:34:36'!
+generateReportForAccounts: aReport
+	aReport generateAccountReport: self.! !
+
+!ReceptiveAccount methodsFor: 'report generation' stamp: 'natanvek 10/26/2023 15:24:46'!
+generateReportForTransactions: aReport
 
 	transactions do: [:aTransaction | aTransaction includeInto: aReport].! !
 
@@ -1011,10 +1091,10 @@ generate
 
 	self subclassResponsibility! !
 
-!Report methodsFor: 'report generation' stamp: 'MLNV 10/26/2023 13:31:16'!
+!Report methodsFor: 'report generation' stamp: 'natanvek 10/26/2023 15:24:46'!
 generateSubtreeReport: aFinancialRecord
 
-	^aFinancialRecord generateReport: self.! !
+	^aFinancialRecord generateReportForTransactions: self.! !
 
 !Report methodsFor: 'report generation' stamp: 'MLNV 10/26/2023 13:22:08'!
 include: aTransactionType with: aValue
@@ -1076,13 +1156,13 @@ initializeDetailDictionary
 		add: #(#Deposit #BasicOperation) -> [:value | 'Depósito por ', value asString, '.'].! !
 
 
-!AccountSummary methodsFor: 'report generation' stamp: 'MLNV 10/26/2023 13:24:24'!
+!AccountSummary methodsFor: 'report generation' stamp: 'natanvek 10/26/2023 15:24:46'!
 generate
 	
 	self initializeDetailDictionary.
 	
 	report := OrderedCollection new.
-	financialRecord generateReport: self.
+	financialRecord generateReportForTransactions: self.
 	report add: 'Balance = ', financialRecord balance asString.
 	
 	^report.
@@ -1103,15 +1183,18 @@ Report subclass: #PortfolioNameTree
 	poolDictionaries: ''
 	category: 'Portfolio-Ejercicio'!
 
-!PortfolioNameTree methodsFor: 'report generation' stamp: 'natanvek 10/26/2023 02:11:57'!
+!PortfolioNameTree methodsFor: 'report generation' stamp: 'natanvek 10/26/2023 15:30:52'!
 generate
 
 	report := OrderedCollection with: (financialRecord name).
-	financialRecord generateReport: self.
+	financialRecord generateReportForAccounts: self.
+	
 	^report
 
-	
 	! !
+
+!PortfolioNameTree methodsFor: 'report generation' stamp: 'natanvek 10/26/2023 15:49:37'!
+generateAccountReport: anAccount	^self! !
 
 !PortfolioNameTree methodsFor: 'report generation' stamp: 'MLNV 10/26/2023 13:31:16'!
 generateSubtreeReport: aFinancialRecord
@@ -1126,10 +1209,44 @@ generateSubtreeReport: aFinancialRecord
 	
 	! !
 
-!PortfolioNameTree methodsFor: 'report generation' stamp: 'MLNV 10/26/2023 13:25:32'!
-include: aTransactionType with: aValue
+
+!classDefinition: #RecordTransactionsTree category: 'Portfolio-Ejercicio'!
+Report subclass: #RecordTransactionsTree
+	instanceVariableNames: ''
+	classVariableNames: ''
+	poolDictionaries: ''
+	category: 'Portfolio-Ejercicio'!
+
+!RecordTransactionsTree methodsFor: 'as yet unclassified' stamp: 'natanvek 10/26/2023 16:31:49'!
+generate
+
+	report := OrderedCollection with: (financialRecord name).
+	financialRecord generateReportForAccounts: self.
+	report add: '    Balance = ', (financialRecord balance) asString.
+	^report
+
+	! !
+
+!RecordTransactionsTree methodsFor: 'as yet unclassified' stamp: 'natanvek 10/26/2023 16:35:54'!
+generateAccountReport: anAccount
+
+	| accountSummary |
+	accountSummary := (AccountSummary for: anAccount) generate.
+	accountSummary removeLast.
+	report addAll: (accountSummary collect:[:aReportEntry | '    ', aReportEntry]).
+! !
+
+!RecordTransactionsTree methodsFor: 'as yet unclassified' stamp: 'natanvek 10/26/2023 16:28:53'!
+generateSubtreeReport: aFinancialRecord
+
+	| subtreeReport |
+
+	subtreeReport := (self class for: aFinancialRecord) generate.
 	
-	^self.! !
+ 	subtreeReport := (subtreeReport collect:[:aReportEntry | '    ', aReportEntry]).
+	report addAll: subtreeReport.
+	
+! !
 
 
 !classDefinition: #TransferNet category: 'Portfolio-Ejercicio'!
@@ -1151,13 +1268,13 @@ initializeDetailDictionary
 		add: #(#Deposit #BasicOperation) -> [:value | 0].! !
 
 
-!TransferNet methodsFor: 'report generation' stamp: 'MLNV 10/26/2023 10:08:15'!
+!TransferNet methodsFor: 'report generation' stamp: 'natanvek 10/26/2023 15:24:46'!
 generate
 
 	self initializeDetailDictionary.
 	
 	report := 0.
-	financialRecord generateReport: self.
+	financialRecord generateReportForTransactions: self.
 		
 	^report.! !
 
