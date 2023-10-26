@@ -458,7 +458,7 @@ test11AccountSummaryForAnidatedPortfolios
 	
 	 ! !
 
-!ReportTest methodsFor: 'tests' stamp: 'MLNV 10/25/2023 23:09:06'!
+!ReportTest methodsFor: 'tests' stamp: 'MLNV 10/26/2023 14:39:09'!
 test12TransferNetForPortfolio
 
 	| anAccount anotherAccount portfolio report|
@@ -1021,6 +1021,18 @@ include: aTransactionType with: aValue
 
 	self subclassResponsibility! !
 
+!Report methodsFor: 'report generation' stamp: 'MLNV 10/26/2023 14:46:57'!
+show
+	
+	TranscriptWindow openTranscript.
+	Transcript clear.
+	Transcript newLine.
+	
+	report do: [: reportEntry | Transcript show: reportEntry. Transcript newLine].
+	
+	Transcript newLine.
+	Transcript endEntry.! !
+
 
 !Report methodsFor: 'initialization' stamp: 'MLNV 10/25/2023 21:20:17'!
 initializeDetailDictionary
@@ -1153,3 +1165,16 @@ generate
 include: aTransactionType with: aValue
 
 	report := report + ((operationToReportEntryDictionary at: aTransactionType) value: aValue)! !
+
+!TransferNet methodsFor: 'report generation' stamp: 'MLNV 10/26/2023 14:49:02'!
+show
+	
+	TranscriptWindow openTranscript.
+	Transcript clear.
+	
+	Transcript newLine.
+	
+	report printOn: Transcript. Transcript newLine.
+	
+	Transcript newLine.
+	Transcript endEntry.! !
