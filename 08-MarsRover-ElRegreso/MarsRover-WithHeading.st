@@ -349,7 +349,7 @@ test28RoverWindowEmpty
 	self assert: marsWindow position equals: expectedPosition.
 ! !
 
-!MarsRoverTest methodsFor: 'tests' stamp: 'MLNV 10/27/2023 18:15:14'!
+!MarsRoverTest methodsFor: 'tests' stamp: 'MLNV 10/28/2023 19:21:34'!
 test29RoverWindowAnyMovement
 	
 	 | marsRover expectedHead  expectedPosition marsWindow|
@@ -363,6 +363,7 @@ test29RoverWindowAnyMovement
 	marsRover process: 'fbff'.	
 	self assert: marsWindow head equals: expectedHead.
 	self assert: marsWindow position equals: expectedPosition.
+
 ! !
 
 !MarsRoverTest methodsFor: 'tests' stamp: 'MLNV 10/27/2023 18:18:36'!
@@ -830,13 +831,13 @@ rotateRight
 
 !classDefinition: #MarsRoverObserver category: 'MarsRover-WithHeading'!
 Object subclass: #MarsRoverObserver
-	instanceVariableNames: ''
+	instanceVariableNames: 'marsRover'
 	classVariableNames: ''
 	poolDictionaries: ''
 	category: 'MarsRover-WithHeading'!
 
-!MarsRoverObserver methodsFor: 'initialization' stamp: 'MLNV 10/27/2023 17:35:52'!
-initialize
+!MarsRoverObserver methodsFor: 'initialization' stamp: 'MLNV 10/28/2023 20:26:47'!
+initialize: aMarsRover
 
 	self subclassResponsibility! !
 
@@ -877,21 +878,27 @@ show
 
 	self subclassResponsibility! !
 
+!MarsRoverObserver methodsFor: 'display' stamp: 'MLNV 10/28/2023 20:33:34'!
+startObservingHead
+
+	marsRover attachHeadUpdateBlock: [:aHeading | aHeading updateObserver: self].! !
+
+!MarsRoverObserver methodsFor: 'display' stamp: 'MLNV 10/28/2023 20:34:45'!
+startObservingPosition
+
+	marsRover attachPositionUpdateBlock: [:aPosition | self logPosition: aPosition].! !
+
 "-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
 
 !classDefinition: 'MarsRoverObserver class' category: 'MarsRover-WithHeading'!
 MarsRoverObserver class
 	instanceVariableNames: ''!
 
-!MarsRoverObserver class methodsFor: 'instance creation' stamp: 'MLNV 10/27/2023 21:00:55'!
+!MarsRoverObserver class methodsFor: 'instance creation' stamp: 'MLNV 10/28/2023 20:23:35'!
 of: marsRover 
-
-	| observer | 
 	
-	observer := self new initialize.
-	marsRover addObserver: observer.
-	
-	^observer ! !
+	^self new initialize: marsRover.
+! !
 
 
 !classDefinition: #MarsRoverLog category: 'MarsRover-WithHeading'!
@@ -901,10 +908,11 @@ MarsRoverObserver subclass: #MarsRoverLog
 	poolDictionaries: ''
 	category: 'MarsRover-WithHeading'!
 
-!MarsRoverLog methodsFor: 'initialization' stamp: 'MLNV 10/27/2023 20:56:10'!
-initialize
+!MarsRoverLog methodsFor: 'initialization' stamp: 'MLNV 10/28/2023 20:27:13'!
+initialize: aMarsRover
 
-	logs := OrderedCollection new.! !
+	logs := OrderedCollection new.
+	marsRover := aMarsRover.! !
 
 
 !MarsRoverLog methodsFor: 'logging' stamp: 'MLNV 10/27/2023 20:56:44'!
@@ -958,11 +966,13 @@ MarsRoverObserver subclass: #MarsRoverWindow
 	poolDictionaries: ''
 	category: 'MarsRover-WithHeading'!
 
-!MarsRoverWindow methodsFor: 'initialization' stamp: 'MLNV 10/27/2023 20:56:38'!
-initialize 
+!MarsRoverWindow methodsFor: 'initialization' stamp: 'MLNV 10/28/2023 20:28:14'!
+initialize: aMarsRover
 
 	head := ''.
-	position := ''.! !
+	position := ''.
+	marsRover := aMarsRover.
+	! !
 
 
 !MarsRoverWindow methodsFor: 'logging' stamp: 'MLNV 10/27/2023 20:58:28'!
@@ -1019,3 +1029,40 @@ position
 show
 
 	^position , ' ' , head.! !
+
+
+!classDefinition: #MarsRoverProxy category: 'MarsRover-WithHeading'!
+ProtoObject subclass: #MarsRoverProxy
+	instanceVariableNames: 'proxee observersUpdateBlocks'
+	classVariableNames: ''
+	poolDictionaries: ''
+	category: 'MarsRover-WithHeading'!
+
+!MarsRoverProxy methodsFor: 'as yet unclassified' stamp: 'MLNV 10/28/2023 20:19:08'!
+doesNotUnderstand: aMessage
+	
+	self updateObservers.
+	^aMessage sendTo: proxee.! !
+
+!MarsRoverProxy methodsFor: 'as yet unclassified' stamp: 'MLNV 10/28/2023 20:18:22'!
+initializeFor: aProxee
+
+	proxee := aProxee.
+	observersUpdateBlocks := OrderedCollection new.! !
+
+!MarsRoverProxy methodsFor: 'as yet unclassified' stamp: 'MLNV 10/28/2023 20:18:51'!
+updateObservers
+	
+	observersUpdateBlocks do:[:ABlock | ABlock value: proxee].
+	! !
+
+"-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
+
+!classDefinition: 'MarsRoverProxy class' category: 'MarsRover-WithHeading'!
+MarsRoverProxy class
+	instanceVariableNames: ''!
+
+!MarsRoverProxy class methodsFor: 'as yet unclassified' stamp: 'MLNV 10/28/2023 19:34:40'!
+for: aProxee
+
+	^self new initializeFor: aProxee.! !
