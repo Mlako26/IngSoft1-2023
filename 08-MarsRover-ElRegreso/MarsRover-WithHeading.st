@@ -169,287 +169,296 @@ test16ForwardBackwardsAndRotateRightWorkAsExpectedWhenPointingWest
 		heading: self west 
 ! !
 
-!MarsRoverTest methodsFor: 'tests' stamp: 'natanvek 10/28/2023 21:15:32'!
+!MarsRoverTest methodsFor: 'tests' stamp: 'MLNV 10/29/2023 18:52:25'!
 test17RoverLogEmpty
 	
 	 | marsRover marsLog |
 	
 	marsRover := MarsRover at: 1@1 heading: self north . 
 	
-	marsLog := MarsRoverLog of: marsRover.	marsLog startObservingPosition.
-	marsLog startObservingHead.
+	marsLog := (MarsRoverLog of: marsRover)	 startObservingPosition; 	startObservingHead.
 	
 	self assert: marsLog show isEmpty.
 ! !
 
-!MarsRoverTest methodsFor: 'tests' stamp: 'natanvek 10/28/2023 21:16:27'!
+!MarsRoverTest methodsFor: 'tests' stamp: 'MLNV 10/29/2023 18:52:58'!
 test18RoverLogMovesForward
-	
-	 | marsRover marsLog |
-	
-	marsRover := MarsRover at: 1@1 heading: self north . 
-	
-	marsLog := MarsRoverLog of: marsRover.
-	marsLog startObservingPosition.
-	marsLog startObservingHead.
-	
-
+	| marsRover marsLog |
+	marsRover := MarsRover
+		at: 1 @ 1
+		heading: self north.
+	marsLog := (MarsRoverLog of: marsRover)
+		startObservingPosition;
+		startObservingHead.
 	marsRover process: 'f'.
-	
-	self assert: marsLog show equals: (OrderedCollection with: 1@2).
-! !
+	self
+		assert: marsLog show
+		equals: (OrderedCollection with: 1 @ 2).! !
 
-!MarsRoverTest methodsFor: 'tests' stamp: 'natanvek 10/28/2023 21:57:49'!
+!MarsRoverTest methodsFor: 'tests' stamp: 'MLNV 10/29/2023 18:53:03'!
 test20RoverLogMovesForwardMultipleTimes
-	
-	 | marsRover marsLog expectedLog |
-	
-	marsRover := MarsRover at: 1@1 heading: self north . 
-	
-	marsLog := MarsRoverLog of: marsRover.	marsLog startObservingPosition.
-	marsLog startObservingHead.
-
+	| marsRover marsLog expectedLog |
+	marsRover := MarsRover
+		at: 1 @ 1
+		heading: self north.
+	marsLog := (MarsRoverLog of: marsRover)
+		startObservingPosition;
+		startObservingHead.
 	marsRover process: 'fffff'.
-	
-	expectedLog := OrderedCollection new. 
-	expectedLog add: 1@2; add: 1@3; add: 1@4; add: 1@5;		 add: 1@6.
-		
-	self assert: marsLog show equals: expectedLog .
-! !
+	expectedLog := OrderedCollection new.
+	expectedLog
+		add: 1 @ 2;
+		add: 1 @ 3;
+		add: 1 @ 4;
+		add: 1 @ 5;
+		add: 1 @ 6.
+	self
+		assert: marsLog show
+		equals: expectedLog.! !
 
-!MarsRoverTest methodsFor: 'tests' stamp: 'natanvek 10/28/2023 21:57:57'!
+!MarsRoverTest methodsFor: 'tests' stamp: 'MLNV 10/29/2023 18:53:06'!
 test21RoverLogMovesBackwardMultipleTimes
-	
-	 | marsRover marsLog expectedLog |
-	
-	marsRover := MarsRover at: 1@1 heading: self north . 
-	
-	marsLog := MarsRoverLog of: marsRover.	marsLog startObservingPosition.
-	marsLog startObservingHead.
-
+	| marsRover marsLog expectedLog |
+	marsRover := MarsRover
+		at: 1 @ 1
+		heading: self north.
+	marsLog := (MarsRoverLog of: marsRover)
+		startObservingPosition;
+		startObservingHead.
 	marsRover process: 'bbb'.
-	
-	expectedLog := OrderedCollection new. 
-	expectedLog add: 1@0; add: 1@-1; add: 1@-2.
-		
-	self assert: marsLog show equals: expectedLog .
-! !
+	expectedLog := OrderedCollection new.
+	expectedLog
+		add: 1 @ 0;
+		add: 1 @ -1;
+		add: 1 @ -2.
+	self
+		assert: marsLog show
+		equals: expectedLog.! !
 
-!MarsRoverTest methodsFor: 'tests' stamp: 'natanvek 10/28/2023 21:58:54'!
+!MarsRoverTest methodsFor: 'tests' stamp: 'MLNV 10/29/2023 18:53:09'!
 test22RoverLogMovesMultipleTimesFromAnyPosition
-	
-	 | marsRover marsLog expectedLog |
-	
-	marsRover := MarsRover at: 2 @1 heading: self north . 
-	
-	marsLog := MarsRoverLog of: marsRover.	marsLog startObservingPosition.
-	marsLog startObservingHead.
-
+	| marsRover marsLog expectedLog |
+	marsRover := MarsRover
+		at: 2 @ 1
+		heading: self north.
+	marsLog := (MarsRoverLog of: marsRover)
+		startObservingPosition;
+		startObservingHead.
 	marsRover process: 'fffff'.
-	
-	expectedLog := OrderedCollection new. 
-	expectedLog add: 2@2; add: 2@3; add: 2@4; add: 2@5;		 add: 2@6.
-		
-	self assert: marsLog show equals: expectedLog .
-! !
+	expectedLog := OrderedCollection new.
+	expectedLog
+		add: 2 @ 2;
+		add: 2 @ 3;
+		add: 2 @ 4;
+		add: 2 @ 5;
+		add: 2 @ 6.
+	self
+		assert: marsLog show
+		equals: expectedLog.! !
 
-!MarsRoverTest methodsFor: 'tests' stamp: 'natanvek 10/28/2023 21:59:01'!
+!MarsRoverTest methodsFor: 'tests' stamp: 'MLNV 10/29/2023 18:53:12'!
 test23RoverLogRotatingTowardsEast
-	
-	 | marsRover marsLog expectedLog |
-	
-	marsRover := MarsRover at: 1@1 heading: self north . 
-	
-	marsLog := MarsRoverLog of: marsRover.
-	marsLog startObservingPosition.
-	marsLog startObservingHead.
+	| marsRover marsLog expectedLog |
+	marsRover := MarsRover
+		at: 1 @ 1
+		heading: self north.
+	marsLog := (MarsRoverLog of: marsRover)
+		startObservingPosition;
+		startObservingHead.
 	marsRover process: 'r'.
-	
-	expectedLog := OrderedCollection new. 
+	expectedLog := OrderedCollection new.
 	expectedLog add: 'East'.
-		
-	self assert: marsLog show equals: expectedLog .
-! !
+	self
+		assert: marsLog show
+		equals: expectedLog.! !
 
-!MarsRoverTest methodsFor: 'tests' stamp: 'natanvek 10/28/2023 21:59:09'!
+!MarsRoverTest methodsFor: 'tests' stamp: 'MLNV 10/29/2023 18:53:14'!
 test24RoverLogRotatingTowardsWest
-	
-	 | marsRover marsLog expectedLog |
-	
-	marsRover := MarsRover at: 1@1 heading: self north . 
-	
-	marsLog := MarsRoverLog of: marsRover.
-	marsLog startObservingPosition.
-	marsLog startObservingHead.
+	| marsRover marsLog expectedLog |
+	marsRover := MarsRover
+		at: 1 @ 1
+		heading: self north.
+	marsLog := (MarsRoverLog of: marsRover)
+		startObservingPosition;
+		startObservingHead.
 	marsRover process: 'l'.
-	
-	expectedLog := OrderedCollection new. 
+	expectedLog := OrderedCollection new.
 	expectedLog add: 'West'.
-		
-	self assert: marsLog show equals: expectedLog .
-! !
+	self
+		assert: marsLog show
+		equals: expectedLog.! !
 
-!MarsRoverTest methodsFor: 'tests' stamp: 'natanvek 10/28/2023 21:59:14'!
+!MarsRoverTest methodsFor: 'tests' stamp: 'MLNV 10/29/2023 18:53:18'!
 test25RoverLogRotatingTowardsSouth
-	
-	 | marsRover marsLog expectedLog |
-	
-	marsRover := MarsRover at: 1@1 heading: self east . 
-	
-	marsLog := MarsRoverLog of: marsRover.	marsLog startObservingPosition.
-	marsLog startObservingHead.
-
+	| marsRover marsLog expectedLog |
+	marsRover := MarsRover
+		at: 1 @ 1
+		heading: self east.
+	marsLog := (MarsRoverLog of: marsRover)
+		startObservingPosition;
+		startObservingHead.
 	marsRover process: 'r'.
-	
-	expectedLog := OrderedCollection new. 
+	expectedLog := OrderedCollection new.
 	expectedLog add: 'South'.
-		
-	self assert: marsLog show equals: expectedLog .
-! !
+	self
+		assert: marsLog show
+		equals: expectedLog.! !
 
-!MarsRoverTest methodsFor: 'tests' stamp: 'natanvek 10/28/2023 21:59:18'!
+!MarsRoverTest methodsFor: 'tests' stamp: 'MLNV 10/29/2023 18:53:20'!
 test26RoverLogRotatingTowardsNorth
-	
-	 | marsRover marsLog expectedLog |
-	
-	marsRover := MarsRover at: 1@1 heading: self east . 
-	
-	marsLog := MarsRoverLog of: marsRover.	marsLog startObservingPosition.
-	marsLog startObservingHead.
-
+	| marsRover marsLog expectedLog |
+	marsRover := MarsRover
+		at: 1 @ 1
+		heading: self east.
+	marsLog := (MarsRoverLog of: marsRover)
+		startObservingPosition;
+		startObservingHead.
 	marsRover process: 'l'.
-	
-	expectedLog := OrderedCollection new. 
+	expectedLog := OrderedCollection new.
 	expectedLog add: 'North'.
-		
-	self assert: marsLog show equals: expectedLog .
-! !
+	self
+		assert: marsLog show
+		equals: expectedLog.! !
 
-!MarsRoverTest methodsFor: 'tests' stamp: 'natanvek 10/28/2023 21:59:22'!
+!MarsRoverTest methodsFor: 'tests' stamp: 'MLNV 10/29/2023 18:53:22'!
 test27RoverLogUpdatesUntilInvalidCommand
-	
-	 | marsRover marsLog expectedLog |
-	
-	marsRover := MarsRover at: 1@1 heading: self north.
-	marsLog := MarsRoverLog of: marsRover.	marsLog startObservingPosition.
-	marsLog startObservingHead.
-
-	expectedLog := OrderedCollection new. 
-	expectedLog add: 'East'; add: 2@1; add: 1@1; add: 0@1; add: 'North'.
-		
-		
-	self 
-		should: [ marsRover process: 'rfbblxfll'.]
-		raise: Error - MessageNotUnderstood 
+	| marsRover marsLog expectedLog |
+	marsRover := MarsRover
+		at: 1 @ 1
+		heading: self north.
+	marsLog := (MarsRoverLog of: marsRover)
+		startObservingPosition;
+		startObservingHead.
+	expectedLog := OrderedCollection new.
+	expectedLog
+		add: 'East';
+		add: 2 @ 1;
+		add: 1 @ 1;
+		add: 0 @ 1;
+		add: 'North'.
+	self
+		should: [ marsRover process: 'rfbblxfll' ]
+		raise: Error - MessageNotUnderstood
 		withExceptionDo: [ :anError |
-			self assert: anError messageText equals: marsRover invalidCommandErrorDescription.
-			self assert: marsLog show equals: expectedLog.	 ].	
-! !
+			self
+				assert: anError messageText
+				equals: marsRover invalidCommandErrorDescription.
+			self
+				assert: marsLog show
+				equals: expectedLog ].! !
 
-!MarsRoverTest methodsFor: 'tests' stamp: 'natanvek 10/28/2023 21:59:37'!
+!MarsRoverTest methodsFor: 'tests' stamp: 'MLNV 10/29/2023 18:53:47'!
 test28RoverWindowEmpty
-	
-	 | marsRover expectedHead  expectedPosition marsWindow|
-	
-	marsRover := MarsRover at: 1@1 heading: self north . 
-	
-	marsWindow := MarsRoverWindow of: marsRover.
-	marsWindow startObservingPosition.
-	marsWindow startObservingHead.
+	| marsRover expectedHead expectedPosition marsWindow |
+	marsRover := MarsRover
+		at: 1 @ 1
+		heading: self north.
+	marsWindow := (MarsRoverWindow of: marsRover)
+		startObservingPosition;
+		startObservingHead.
+	expectedHead := ''.
+	expectedPosition := ''.
+	self
+		assert: marsWindow head
+		equals: expectedHead.
+	self
+		assert: marsWindow position
+		equals: expectedPosition.! !
 
-	expectedHead := ''. 
-	expectedPosition := ''. 
-		
-	self assert: marsWindow head equals: expectedHead.
-	self assert: marsWindow position equals: expectedPosition.
-! !
-
-!MarsRoverTest methodsFor: 'tests' stamp: 'natanvek 10/28/2023 21:59:47'!
+!MarsRoverTest methodsFor: 'tests' stamp: 'MLNV 10/29/2023 18:53:56'!
 test29RoverWindowAnyMovement
-	
-	 | marsRover expectedHead  expectedPosition marsWindow|
-	
-	marsRover := MarsRover at: 1@1 heading: self north . 
-	marsWindow := MarsRoverWindow of: marsRover.
-	marsWindow startObservingPosition.
-	marsWindow startObservingHead.
-	
-	expectedHead := ''. 
-	expectedPosition := '1@3'. 
-		
-	marsRover process: 'fbff'.	
-	self assert: marsWindow head equals: expectedHead.
-	self assert: marsWindow position equals: expectedPosition.
+	| marsRover expectedHead expectedPosition marsWindow |
+	marsRover := MarsRover
+		at: 1 @ 1
+		heading: self north.
+	marsWindow := (MarsRoverWindow of: marsRover)
+		startObservingPosition;
+		startObservingHead.
+	expectedHead := ''.
+	expectedPosition := '1@3'.
+	marsRover process: 'fbff'.
+	self
+		assert: marsWindow head
+		equals: expectedHead.
+	self
+		assert: marsWindow position
+		equals: expectedPosition.! !
 
-! !
-
-!MarsRoverTest methodsFor: 'tests' stamp: 'natanvek 10/28/2023 21:59:56'!
+!MarsRoverTest methodsFor: 'tests' stamp: 'MLNV 10/29/2023 18:54:00'!
 test30RoverWindowNorthRotation
-	
-	 | marsRover expectedHead  expectedPosition marsWindow|
-	
-	marsRover := MarsRover at: 1@1 heading: self north . 
-	marsWindow := MarsRoverWindow of: marsRover.	marsWindow startObservingPosition.
-	marsWindow startObservingHead.
-	
-	expectedHead := 'Apuntando al Norte'. 
-	expectedPosition := ''. 
-		
+	| marsRover expectedHead expectedPosition marsWindow |
+	marsRover := MarsRover
+		at: 1 @ 1
+		heading: self north.
+	marsWindow := (MarsRoverWindow of: marsRover)
+		startObservingPosition;
+		startObservingHead.
+	expectedHead := 'Apuntando al Norte'.
+	expectedPosition := ''.
 	marsRover process: 'rl'.
-	self assert: marsWindow head equals: expectedHead.
-	self assert: marsWindow position equals: expectedPosition.
-! !
+	self
+		assert: marsWindow head
+		equals: expectedHead.
+	self
+		assert: marsWindow position
+		equals: expectedPosition.! !
 
-!MarsRoverTest methodsFor: 'tests' stamp: 'natanvek 10/28/2023 22:00:16'!
+!MarsRoverTest methodsFor: 'tests' stamp: 'MLNV 10/29/2023 18:54:04'!
 test31RoverWindowSouthRotation
-	
-	 | marsRover expectedHead  expectedPosition marsWindow|
-	
-	marsRover := MarsRover at: 1@1 heading: self north . 
-	marsWindow := MarsRoverWindow of: marsRover.	marsWindow startObservingPosition.
-	marsWindow startObservingHead.
-	
-	expectedHead := 'Apuntando al Sur'. 
-	expectedPosition := ''. 
-		
+	| marsRover expectedHead expectedPosition marsWindow |
+	marsRover := MarsRover
+		at: 1 @ 1
+		heading: self north.
+	marsWindow := (MarsRoverWindow of: marsRover)
+		startObservingPosition;
+		startObservingHead.
+	expectedHead := 'Apuntando al Sur'.
+	expectedPosition := ''.
 	marsRover process: 'rr'.
-	self assert: marsWindow head equals: expectedHead.
-	self assert: marsWindow position equals: expectedPosition.
-! !
+	self
+		assert: marsWindow head
+		equals: expectedHead.
+	self
+		assert: marsWindow position
+		equals: expectedPosition.! !
 
-!MarsRoverTest methodsFor: 'tests' stamp: 'natanvek 10/28/2023 22:00:19'!
+!MarsRoverTest methodsFor: 'tests' stamp: 'MLNV 10/29/2023 18:54:06'!
 test32RoverWindowEastRotation
-	
-	 | marsRover expectedHead  expectedPosition marsWindow|
-	
-	marsRover := MarsRover at: 1@1 heading: self north . 
-	marsWindow := MarsRoverWindow of: marsRover.	marsWindow startObservingPosition.
-	marsWindow startObservingHead.
-	
-	expectedHead := 'Apuntando al Este'. 
-	expectedPosition := ''. 
-		
+	| marsRover expectedHead expectedPosition marsWindow |
+	marsRover := MarsRover
+		at: 1 @ 1
+		heading: self north.
+	marsWindow := (MarsRoverWindow of: marsRover)
+		startObservingPosition;
+		startObservingHead.
+	expectedHead := 'Apuntando al Este'.
+	expectedPosition := ''.
 	marsRover process: 'r'.
-	self assert: marsWindow head equals: expectedHead.
-	self assert: marsWindow position equals: expectedPosition.
-! !
+	self
+		assert: marsWindow head
+		equals: expectedHead.
+	self
+		assert: marsWindow position
+		equals: expectedPosition.! !
 
-!MarsRoverTest methodsFor: 'tests' stamp: 'natanvek 10/28/2023 22:00:23'!
+!MarsRoverTest methodsFor: 'tests' stamp: 'MLNV 10/29/2023 18:54:09'!
 test33RoverWindowWestRotation
-	
-	 | marsRover expectedHead  expectedPosition marsWindow|
-	
-	marsRover := MarsRover at: 1@1 heading: self north . 
-	marsWindow := MarsRoverWindow of: marsRover.	marsWindow startObservingPosition.
-	marsWindow startObservingHead.
-	
-	expectedHead := 'Apuntando al Oeste'. 
-	expectedPosition := ''. 
-		
+	| marsRover expectedHead expectedPosition marsWindow |
+	marsRover := MarsRover
+		at: 1 @ 1
+		heading: self north.
+	marsWindow := (MarsRoverWindow of: marsRover)
+		startObservingPosition;
+		startObservingHead.
+	expectedHead := 'Apuntando al Oeste'.
+	expectedPosition := ''.
 	marsRover process: 'l'.
-	self assert: marsWindow head equals: expectedHead.
-	self assert: marsWindow position equals: expectedPosition.
-! !
+	self
+		assert: marsWindow head
+		equals: expectedHead.
+	self
+		assert: marsWindow position
+		equals: expectedPosition.! !
 
 
 !MarsRoverTest methodsFor: 'headings' stamp: 'HAW 10/7/2021 20:09:31'!
@@ -616,32 +625,13 @@ processCommand: aCommand
 	self signalInvalidCommand.! !
 
 
-!MarsRover methodsFor: 'observing' stamp: 'MLNV 10/27/2023 20:31:39'!
-addObserver: anObserver
-	
-	observers add: anObserver.
-	! !
-
-!MarsRover methodsFor: 'observing' stamp: 'MLNV 10/27/2023 20:32:57'!
-updateObserversHeading
-	
-	observers do:[:anObserver | head updateObserver: anObserver].
-	! !
-
-!MarsRover methodsFor: 'observing' stamp: 'MLNV 10/27/2023 20:32:34'!
-updateObserversPosition
-	
-	observers do:[:anObserver | anObserver logPosition: position].
-	! !
-
-
-!MarsRover methodsFor: 'as yet unclassified' stamp: 'natanvek 10/28/2023 21:09:51'!
+!MarsRover methodsFor: 'attaching' stamp: 'natanvek 10/28/2023 21:09:51'!
 attachHeadUpdateBlock: aBlock
 
 	head attachObserverUpdateBlock: aBlock.
 	! !
 
-!MarsRover methodsFor: 'as yet unclassified' stamp: 'natanvek 10/28/2023 21:09:51'!
+!MarsRover methodsFor: 'attaching' stamp: 'natanvek 10/28/2023 21:09:51'!
 attachPositionUpdateBlock: aBlock
 
 	position attachObserverUpdateBlock: aBlock.
@@ -869,6 +859,16 @@ initialize: aMarsRover
 
 	self subclassResponsibility! !
 
+!MarsRoverObserver methodsFor: 'initialization' stamp: 'MLNV 10/28/2023 20:33:34'!
+startObservingHead
+
+	marsRover attachHeadUpdateBlock: [:aHeading | aHeading updateObserver: self].! !
+
+!MarsRoverObserver methodsFor: 'initialization' stamp: 'MLNV 10/28/2023 20:34:45'!
+startObservingPosition
+
+	marsRover attachPositionUpdateBlock: [:aPosition | self logPosition: aPosition].! !
+
 
 !MarsRoverObserver methodsFor: 'logging' stamp: 'natanvek 10/27/2023 16:41:38'!
 logHeadingEast
@@ -896,25 +896,10 @@ logPosition: aPosition
 	self subclassResponsibility! !
 
 
-!MarsRoverObserver methodsFor: 'display' stamp: 'MLNV 10/27/2023 20:53:28'!
-display
-
-	self subclassResponsibility! !
-
 !MarsRoverObserver methodsFor: 'display' stamp: 'natanvek 10/27/2023 16:43:00'!
 show
 
 	self subclassResponsibility! !
-
-!MarsRoverObserver methodsFor: 'display' stamp: 'MLNV 10/28/2023 20:33:34'!
-startObservingHead
-
-	marsRover attachHeadUpdateBlock: [:aHeading | aHeading updateObserver: self].! !
-
-!MarsRoverObserver methodsFor: 'display' stamp: 'MLNV 10/28/2023 20:34:45'!
-startObservingPosition
-
-	marsRover attachPositionUpdateBlock: [:aPosition | self logPosition: aPosition].! !
 
 "-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
 
@@ -969,18 +954,6 @@ logPosition: aPosition
 	logs add: aPosition.! !
 
 
-!MarsRoverLog methodsFor: 'display' stamp: 'MLNV 10/27/2023 20:49:43'!
-display
-
-	TranscriptWindow openTranscript.
-	Transcript clear.
-	Transcript newLine.
-	
-	logs do: [: logEntry | Transcript show: logEntry. Transcript newLine].
-	
-	Transcript newLine.
-	Transcript endEntry.! !
-
 !MarsRoverLog methodsFor: 'display' stamp: 'MLNV 10/27/2023 20:56:57'!
 show
 
@@ -1030,19 +1003,6 @@ logPosition: aPosition
 	position := aPosition asString.! !
 
 
-!MarsRoverWindow methodsFor: 'display' stamp: 'MLNV 10/27/2023 20:55:14'!
-display
-
-	TranscriptWindow openTranscript.
-	Transcript clear.
-	Transcript newLine.
-	
-	Transcript show: ('Posición: ', position); newLine.
-	Transcript show: ('Heading: ', head); newLine.
-	
-	Transcript newLine.
-	Transcript endEntry.! !
-
 !MarsRoverWindow methodsFor: 'display' stamp: 'MLNV 10/27/2023 20:57:03'!
 head
 
@@ -1053,10 +1013,9 @@ position
 
 	^position.! !
 
-!MarsRoverWindow methodsFor: 'display' stamp: 'MLNV 10/27/2023 20:57:12'!
+!MarsRoverWindow methodsFor: 'display' stamp: 'MLNV 10/29/2023 18:45:42'!
 show
-
-	^position , ' ' , head.! !
+	^OrderedCollection with: position with: head.! !
 
 
 !classDefinition: #MarsRoverProxy category: 'MarsRover-WithHeading'!
@@ -1066,31 +1025,33 @@ ProtoObject subclass: #MarsRoverProxy
 	poolDictionaries: ''
 	category: 'MarsRover-WithHeading'!
 
-!MarsRoverProxy methodsFor: 'as yet unclassified' stamp: 'natanvek 10/28/2023 21:09:51'!
-attachObserverUpdateBlock: anObserverUpdateBlock
-	
-	observersUpdateBlocks add: anObserverUpdateBlock.
-	! !
-
-!MarsRoverProxy methodsFor: 'as yet unclassified' stamp: 'natanvek 10/28/2023 21:57:03'!
-doesNotUnderstand: aMessage
-	
-	^ (aMessage sendTo: proxee).
-! !
-
-!MarsRoverProxy methodsFor: 'as yet unclassified' stamp: 'MLNV 10/28/2023 20:18:22'!
+!MarsRoverProxy methodsFor: 'initialization' stamp: 'MLNV 10/28/2023 20:18:22'!
 initializeFor: aProxee
 
 	proxee := aProxee.
 	observersUpdateBlocks := OrderedCollection new.! !
 
-!MarsRoverProxy methodsFor: 'as yet unclassified' stamp: 'natanvek 10/28/2023 21:57:10'!
+
+!MarsRoverProxy methodsFor: 'proxee' stamp: 'natanvek 10/28/2023 21:57:03'!
+doesNotUnderstand: aMessage
+	
+	^ (aMessage sendTo: proxee).
+! !
+
+
+!MarsRoverProxy methodsFor: 'updating' stamp: 'natanvek 10/28/2023 21:09:51'!
+attachObserverUpdateBlock: anObserverUpdateBlock
+	
+	observersUpdateBlocks add: anObserverUpdateBlock.
+	! !
+
+!MarsRoverProxy methodsFor: 'updating' stamp: 'natanvek 10/28/2023 21:57:10'!
 update: value
 	
 	proxee := value.
 	self updateObservers.! !
 
-!MarsRoverProxy methodsFor: 'as yet unclassified' stamp: 'natanvek 10/28/2023 21:05:59'!
+!MarsRoverProxy methodsFor: 'updating' stamp: 'natanvek 10/28/2023 21:05:59'!
 updateObservers
 	
 	observersUpdateBlocks do:[:ABlock | ABlock value: proxee].
@@ -1102,7 +1063,7 @@ updateObservers
 MarsRoverProxy class
 	instanceVariableNames: ''!
 
-!MarsRoverProxy class methodsFor: 'as yet unclassified' stamp: 'MLNV 10/28/2023 19:34:40'!
+!MarsRoverProxy class methodsFor: 'instance creation' stamp: 'MLNV 10/28/2023 19:34:40'!
 for: aProxee
 
 	^self new initializeFor: aProxee.! !
