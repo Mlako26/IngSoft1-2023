@@ -258,7 +258,7 @@ now
 
 	^time.! !
 
-!InterfaceTest methodsFor: 'tests' stamp: 'MLNV 11/8/2023 22:45:39'!
+!InterfaceTest methodsFor: 'tests' stamp: 'MLNV 11/9/2023 17:24:18'!
 test01CantCreateCartWithInvalidCredentials
 
 	| interface |
@@ -271,7 +271,7 @@ test01CantCreateCartWithInvalidCredentials
 		should: [interface createCartWithClientId: 'pepe' andPassword: 'pepito']
 		raise: Error - MessageNotUnderstood
 		withExceptionDo: [:anError |
-			self assert: (anError messageText = interface invalidCredentialsErrorDescription).
+			self assert: (anError messageText = Interface invalidCredentialsErrorDescription).
 		]! !
 
 !InterfaceTest methodsFor: 'tests' stamp: 'MLNV 11/9/2023 14:23:49'!
@@ -447,41 +447,6 @@ test08InterfaceFullfilsValidPurchase
 ! !
 
 !InterfaceTest methodsFor: 'tests' stamp: 'MLNV 11/9/2023 16:17:43'!
-test09InterfaceListsPurchasesOfASingleClient
-
-	| interface cartId item anotherItem card clientID password itemList expectedSale |
-		
-	interface := Interface 
-		withCatalog: testObjectsFactory defaultCatalog
-		andAuthenticator: self
-		through: self.
-		
-	clientID := 'pepeBueno'.
-	password := 'pepito'.
-	item := testObjectsFactory itemSellByTheStore .
-	anotherItem := testObjectsFactory anotherItemSellByTheStore .
-	card := testObjectsFactory notExpiredCreditCard.
-	
-	itemList := Dictionary new.
-	itemList at: item put: 3.
-	itemList at: anotherItem put: 2.
-	
-	expectedSale := Sale of: 50 forItems: itemList.
-	
-	cartId := interface createCartWithClientId: clientID andPassword: password.
-	interface addToCartWithId: cartId item: item withOcurrances: 3.
-	interface addToCartWithId: cartId item: anotherItem withOcurrances: 2.
-	
-	interface checkOut: cartId with: card.
-	
-	self assert: 	(interface listPurchasesOfClient: clientID withPassword: password) equals: expectedSale .
-
-	
-	
-	
-! !
-
-!InterfaceTest methodsFor: 'tests' stamp: 'MLNV 11/9/2023 16:17:43'!
 test10InterfaceListsPurchasesOfMultipleCartsOfASingleClient
 
 	| interface cartId secondCartId item card clientID password itemList expectedSale |
@@ -583,8 +548,8 @@ test12CantAddItemOnACartAfter30MinutesOfInactivity
 			]
 ! !
 
-!InterfaceTest methodsFor: 'tests' stamp: 'MLNV 11/9/2023 17:16:56'!
-test12UsingACartRefreshesItsExpiration
+!InterfaceTest methodsFor: 'tests' stamp: 'MLNV 11/9/2023 17:21:23'!
+test13UsingACartRefreshesItsExpiration
 
 	| interface cartId clientID password item|
 	
@@ -609,6 +574,32 @@ test12UsingACartRefreshesItsExpiration
 	time := time + 20 minutes.
 	
 	self shouldnt: [interface addToCartWithId: cartId item: item withOcurrances: 1.] raise: Error.
+! !
+
+!InterfaceTest methodsFor: 'tests' stamp: 'MLNV 11/9/2023 17:24:29'!
+test14CantListPurchasesOfAnInvalidClient
+
+	| interface clientID password |
+		
+	authenticationValue := false.
+	
+	interface := Interface 
+		withCatalog: testObjectsFactory defaultCatalog
+		andAuthenticator: self
+		through: self.
+		
+	clientID := 'pepeBueno'.
+	password := 'pepito'.
+	
+	self should: 	[interface listPurchasesOfClient: clientID withPassword: password]
+	raise: Error - MessageNotUnderstood 
+	withExceptionDo: [:anError |
+			self assert: anError messageText = Interface invalidCredentialsErrorDescription 
+		]
+
+	
+	
+	
 ! !
 
 
@@ -972,10 +963,10 @@ checkOut: cartId with: card
 	
 	! !
 
-!Interface methodsFor: 'operators' stamp: 'MLNV 11/9/2023 17:02:37'!
+!Interface methodsFor: 'operators' stamp: 'MLNV 11/9/2023 17:24:12'!
 createCartWithClientId: aClientId andPassword: aPassword
 
-	(credentialAuthenticator attemptLoginTo: aClientId with: aPassword) ifFalse: [self error: self invalidCredentialsErrorDescription].
+	(credentialAuthenticator attemptLoginTo: aClientId with: aPassword) ifFalse: [self error: self class invalidCredentialsErrorDescription].
 	
 	carts add: (CartProxy forCatalog: 	catalog andTimeSystem: timeSystem).
 	owners add: aClientId.
@@ -990,18 +981,15 @@ listCart: cartId
 	
 ! !
 
-!Interface methodsFor: 'operators' stamp: 'MLNV 11/9/2023 16:31:17'!
-listPurchasesOfClient: clientId withPassword: password 
+!Interface methodsFor: 'operators' stamp: 'MLNV 11/9/2023 17:24:59'!
+listPurchasesOfClient: aClientId withPassword: aPassword 
 	
-	^(purchases at: clientId) inject: (Sale of: 0) into:
+	(credentialAuthenticator attemptLoginTo: aClientId with: aPassword) ifFalse: [self error: self class invalidCredentialsErrorDescription].
+	
+	^(purchases at: aClientId) inject: (Sale of: 0) into:
 		 [:finalSale :aSale | finalSale mergeSale: aSale].
 	! !
 
-
-!Interface methodsFor: 'error descriptions' stamp: 'SC 11/6/2023 20:11:34'!
-invalidCredentialsErrorDescription
-
-	^'papu no matchean'.! !
 
 "-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
 
@@ -1043,6 +1031,11 @@ expiredCartErrorDescription
 invalidAmountErrorDescription
 	
 	^'Invalid number of items'! !
+
+!Interface class methodsFor: 'error descriptions' stamp: 'MLNV 11/9/2023 17:24:02'!
+invalidCredentialsErrorDescription
+
+	^'papu no matchean'.! !
 
 !Interface class methodsFor: 'error descriptions' stamp: 'MLNV 11/8/2023 23:35:37'!
 invalidItemErrorDescription
