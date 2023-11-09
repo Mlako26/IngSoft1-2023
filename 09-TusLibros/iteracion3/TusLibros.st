@@ -248,10 +248,15 @@ debit: anAmount from: aCreditCard
 
 !classDefinition: #InterfaceTest category: 'TusLibros'!
 TestCase subclass: #InterfaceTest
-	instanceVariableNames: 'testObjectsFactory authenticationValue'
+	instanceVariableNames: 'testObjectsFactory authenticationValue time'
 	classVariableNames: ''
 	poolDictionaries: ''
 	category: 'TusLibros'!
+
+!InterfaceTest methodsFor: 'tests' stamp: 'MLNV 11/9/2023 17:08:52'!
+now
+
+	^time.! !
 
 !InterfaceTest methodsFor: 'tests' stamp: 'MLNV 11/8/2023 22:45:39'!
 test01CantCreateCartWithInvalidCredentials
@@ -269,11 +274,13 @@ test01CantCreateCartWithInvalidCredentials
 			self assert: (anError messageText = interface invalidCredentialsErrorDescription).
 		]! !
 
-!InterfaceTest methodsFor: 'tests' stamp: 'MLNV 11/8/2023 22:45:45'!
+!InterfaceTest methodsFor: 'tests' stamp: 'MLNV 11/9/2023 14:23:49'!
 test02CanCreateCartWithValidCredentials
 
 	| interface cartId |
-		
+	
+	authenticationValue := true.
+	
 	interface := Interface withAuthenticator: self.
 	
 	cartId := interface createCartWithClientId: 'pepeBueno' andPassword: 'pepito'.
@@ -281,7 +288,7 @@ test02CanCreateCartWithValidCredentials
 	self assert: (interface listCart: cartId) isEmpty.
 ! !
 
-!InterfaceTest methodsFor: 'tests' stamp: 'MLNV 11/8/2023 22:45:04'!
+!InterfaceTest methodsFor: 'tests' stamp: 'MLNV 11/9/2023 16:17:43'!
 test03InterfaceAddsValidItemToCart
 
 	| interface cartId item expected |
@@ -298,11 +305,11 @@ test03InterfaceAddsValidItemToCart
 	expected at: item put: 1.
 	
 	cartId := interface createCartWithClientId: 'pepeBueno' andPassword: 'pepito'.
-	interface addToCartWithId: cartId withIsbn: item withOcurrances: 1.
+	interface addToCartWithId: cartId item: item withOcurrances: 1.
 	
 	self assert: (interface listCart: cartId) equals: expected.! !
 
-!InterfaceTest methodsFor: 'tests' stamp: 'MLNV 11/8/2023 22:51:08'!
+!InterfaceTest methodsFor: 'tests' stamp: 'MLNV 11/9/2023 16:17:43'!
 test04InterfaceAddsMultipleValidItemsToCart
 
 	| interface cartId item expected |
@@ -319,12 +326,12 @@ test04InterfaceAddsMultipleValidItemsToCart
 	expected at: item put: 2.
 	
 	cartId := interface createCartWithClientId: 'pepeBueno' andPassword: 'pepito'.
-	interface addToCartWithId: cartId withIsbn: item withOcurrances: 1.
-	interface addToCartWithId: cartId withIsbn: item withOcurrances: 1.
+	interface addToCartWithId: cartId item: item withOcurrances: 1.
+	interface addToCartWithId: cartId item: item withOcurrances: 1.
 	
 	self assert: (interface listCart: cartId) equals: expected.! !
 
-!InterfaceTest methodsFor: 'tests' stamp: 'MLNV 11/8/2023 23:08:25'!
+!InterfaceTest methodsFor: 'tests' stamp: 'MLNV 11/9/2023 16:17:43'!
 test05InterfacelistsAllItemsOfCart
 
 	| interface cartId item anotherItem expected |
@@ -343,15 +350,15 @@ test05InterfacelistsAllItemsOfCart
 	expected at: anotherItem put: 2.
 	
 	cartId := interface createCartWithClientId: 'pepeBueno' andPassword: 'pepito'.
-	interface addToCartWithId: cartId withIsbn: item withOcurrances: 3.
-	interface addToCartWithId: cartId withIsbn: anotherItem withOcurrances: 2.
+	interface addToCartWithId: cartId item: item withOcurrances: 3.
+	interface addToCartWithId: cartId item: anotherItem withOcurrances: 2.
 	
 	self assert: (interface listCart: cartId) equals: expected.
 	
 
 ! !
 
-!InterfaceTest methodsFor: 'tests' stamp: 'MLNV 11/8/2023 23:15:28'!
+!InterfaceTest methodsFor: 'tests' stamp: 'MLNV 11/9/2023 16:17:43'!
 test06CantAddItemThatIsNotInTheCatalog
 
 	| interface cartId item |
@@ -367,7 +374,7 @@ test06CantAddItemThatIsNotInTheCatalog
 	cartId := interface createCartWithClientId: 'pepeBueno' andPassword: 'pepito'.
 	
 	self 
-		should: [	interface addToCartWithId: cartId withIsbn: item withOcurrances: 1.]
+		should: [	interface addToCartWithId: cartId item: item withOcurrances: 1.]
 		raise:  Error - MessageNotUnderstood
 		withExceptionDo: [:anError |
 				self assert: anError messageText = Interface invalidItemErrorDescription
@@ -378,7 +385,7 @@ test06CantAddItemThatIsNotInTheCatalog
 	
 ! !
 
-!InterfaceTest methodsFor: 'tests' stamp: 'MLNV 11/8/2023 23:18:30'!
+!InterfaceTest methodsFor: 'tests' stamp: 'MLNV 11/9/2023 16:17:43'!
 test07CantAddANonPositiveAmountOfItems
 
 	| interface cartId item |
@@ -394,7 +401,7 @@ test07CantAddANonPositiveAmountOfItems
 	cartId := interface createCartWithClientId: 'pepeBueno' andPassword: 'pepito'.
 	
 	self 
-		should: [	interface addToCartWithId: cartId withIsbn: item withOcurrances: -1.]
+		should: [	interface addToCartWithId: cartId item: item withOcurrances: -1.]
 		raise:  Error - MessageNotUnderstood
 		withExceptionDo: [:anError |
 				self assert: anError messageText = Interface invalidAmountErrorDescription
@@ -405,30 +412,203 @@ test07CantAddANonPositiveAmountOfItems
 	
 ! !
 
-!InterfaceTest methodsFor: 'tests' stamp: 'MLNV 11/9/2023 12:18:42'!
+!InterfaceTest methodsFor: 'tests' stamp: 'MLNV 11/9/2023 16:17:43'!
 test08InterfaceFullfilsValidPurchase
 
-	| interface cartId item card |
+	| interface cartId item card clientID password itemList expectedSale |
 	
 	authenticationValue := true.
 	
 	interface := Interface 
 		withCatalog: testObjectsFactory defaultCatalog
-		andAuthenticator: self.
-	
+		andAuthenticator: self
+		through: self.
+		
+	clientID := 'pepeBueno'.
+	password := 'pepito'.
 	item := testObjectsFactory itemSellByTheStore .
 	card := testObjectsFactory notExpiredCreditCard.
 	
-	cartId := interface createCartWithClientId: 'pepeBueno' andPassword: 'pepito'.
-	interface addToCartWithId: cartId withIsbn: item withOcurrances: 1.
-
+	itemList := Dictionary new.
+	itemList at: item put: 1.
+	
+	expectedSale := Sale of: 10 forItems: itemList.
+	
+	cartId := interface createCartWithClientId: clientID andPassword: password.
+	interface addToCartWithId: cartId item: item withOcurrances: 1.
+	
 	interface checkOut: cartId with: card.
 	
-	self assert: 	((interface purchases) includes: item)
+	self assert: 	(interface listPurchasesOfClient: clientID withPassword: password) equals: expectedSale .
 
 	
 	
 	
+! !
+
+!InterfaceTest methodsFor: 'tests' stamp: 'MLNV 11/9/2023 16:17:43'!
+test09InterfaceListsPurchasesOfASingleClient
+
+	| interface cartId item anotherItem card clientID password itemList expectedSale |
+		
+	interface := Interface 
+		withCatalog: testObjectsFactory defaultCatalog
+		andAuthenticator: self
+		through: self.
+		
+	clientID := 'pepeBueno'.
+	password := 'pepito'.
+	item := testObjectsFactory itemSellByTheStore .
+	anotherItem := testObjectsFactory anotherItemSellByTheStore .
+	card := testObjectsFactory notExpiredCreditCard.
+	
+	itemList := Dictionary new.
+	itemList at: item put: 3.
+	itemList at: anotherItem put: 2.
+	
+	expectedSale := Sale of: 50 forItems: itemList.
+	
+	cartId := interface createCartWithClientId: clientID andPassword: password.
+	interface addToCartWithId: cartId item: item withOcurrances: 3.
+	interface addToCartWithId: cartId item: anotherItem withOcurrances: 2.
+	
+	interface checkOut: cartId with: card.
+	
+	self assert: 	(interface listPurchasesOfClient: clientID withPassword: password) equals: expectedSale .
+
+	
+	
+	
+! !
+
+!InterfaceTest methodsFor: 'tests' stamp: 'MLNV 11/9/2023 16:17:43'!
+test10InterfaceListsPurchasesOfMultipleCartsOfASingleClient
+
+	| interface cartId secondCartId item card clientID password itemList expectedSale |
+		
+	interface := Interface 
+		withCatalog: testObjectsFactory defaultCatalog
+		andAuthenticator: self
+		through: self.
+		
+	clientID := 'pepeBueno'.
+	password := 'pepito'.
+	item := testObjectsFactory itemSellByTheStore .
+	card := testObjectsFactory notExpiredCreditCard.
+	
+	itemList := Dictionary new.
+	itemList at: item put: 2.
+	
+	expectedSale := Sale of: 20 forItems: itemList.
+	
+	cartId := interface createCartWithClientId: clientID andPassword: password.
+	secondCartId := interface createCartWithClientId: clientID andPassword: password.
+	interface addToCartWithId: cartId item: item withOcurrances: 1.
+	interface addToCartWithId: secondCartId item: item withOcurrances: 1.
+	
+	interface checkOut: cartId with: card.
+	interface checkOut: secondCartId with: card.
+	
+	self assert: 	(interface listPurchasesOfClient: clientID withPassword: password) equals: expectedSale .
+
+	
+	
+	
+! !
+
+!InterfaceTest methodsFor: 'tests' stamp: 'MLNV 11/9/2023 16:34:58'!
+test11InterfaceSeparatesPurchasesOfDifferentClients
+
+	| interface cartId secondCartId item card firstClientID secondClientID password itemList expectedSale |
+		
+	interface := Interface 
+		withCatalog: testObjectsFactory defaultCatalog
+		andAuthenticator: self
+		through: self.
+		
+
+	firstClientID := 'pepeBueno'.
+	secondClientID := 'pepeMalo'.
+	password := 'pepito'.
+	item := testObjectsFactory itemSellByTheStore .
+	card := testObjectsFactory notExpiredCreditCard.
+	
+	itemList := Dictionary new.
+	itemList at: item put: 1.
+	
+	expectedSale := Sale of: 10 forItems: itemList.
+	
+	cartId := interface createCartWithClientId: firstClientID andPassword: password.
+	secondCartId := interface createCartWithClientId: secondClientID andPassword: password.
+	interface addToCartWithId: cartId item: item withOcurrances: 1.
+	interface addToCartWithId: secondCartId item: item withOcurrances: 1.
+	
+	interface checkOut: cartId with: card.
+	interface checkOut: secondCartId with: card.
+	
+	self assert: 	(interface listPurchasesOfClient: firstClientID withPassword: password) equals: expectedSale.
+	self assert: 	(interface listPurchasesOfClient: secondClientID withPassword: password) equals: expectedSale.
+
+	
+	
+	
+! !
+
+!InterfaceTest methodsFor: 'tests' stamp: 'MLNV 11/9/2023 17:12:37'!
+test12CantAddItemOnACartAfter30MinutesOfInactivity
+
+	| interface cartId clientID password item|
+	
+	time := DateAndTime now.
+	
+	interface := Interface 
+		withCatalog: testObjectsFactory defaultCatalog
+		andAuthenticator: self
+		through: self
+		andTimeSystem: self.
+		
+	clientID := 'pepeBueno'.
+	password := 'pepito'.
+	item := testObjectsFactory itemSellByTheStore.	
+	
+	cartId := interface createCartWithClientId: clientID andPassword: password.
+	
+	time := time + 30 minutes.
+	
+	self 
+		should: [interface addToCartWithId: cartId item: item withOcurrances: 1]
+		raise: Error - MessageNotUnderstood 
+		withExceptionDo: [:anError | 
+				self assert: anError messageText = Interface expiredCartErrorDescription.
+			]
+! !
+
+!InterfaceTest methodsFor: 'tests' stamp: 'MLNV 11/9/2023 17:16:56'!
+test12UsingACartRefreshesItsExpiration
+
+	| interface cartId clientID password item|
+	
+	time := DateAndTime now.
+	
+	interface := Interface 
+		withCatalog: testObjectsFactory defaultCatalog
+		andAuthenticator: self
+		through: self
+		andTimeSystem: self.
+		
+	clientID := 'pepeBueno'.
+	password := 'pepito'.
+	item := testObjectsFactory itemSellByTheStore.	
+	
+	cartId := interface createCartWithClientId: clientID andPassword: password.
+	
+	time := time + 20 minutes.
+	
+	interface addToCartWithId: cartId item: item withOcurrances: 1.
+	
+	time := time + 20 minutes.
+	
+	self shouldnt: [interface addToCartWithId: cartId item: item withOcurrances: 1.] raise: Error.
 ! !
 
 
@@ -443,6 +623,11 @@ setUp
 attemptLoginTo: aClientId with: aPassword 
 	
 	^authenticationValue! !
+
+!InterfaceTest methodsFor: 'support' stamp: 'MLNV 11/9/2023 15:34:59'!
+debit: anAmount from: aCard
+
+	^self.! !
 
 
 !classDefinition: #Cart category: 'TusLibros'!
@@ -541,6 +726,45 @@ acceptingItemsOf: aCatalog
 	^self new initializeAcceptingItemsOf: aCatalog ! !
 
 
+!classDefinition: #CartProxy category: 'TusLibros'!
+Object subclass: #CartProxy
+	instanceVariableNames: 'proxee lastOperationTimestamp timeSystem'
+	classVariableNames: ''
+	poolDictionaries: ''
+	category: 'TusLibros'!
+
+!CartProxy methodsFor: 'initialization' stamp: 'MLNV 11/9/2023 17:17:15'!
+doesNotUnderstand: aMessage
+
+	((lastOperationTimestamp + 30 minutes) <= timeSystem now) ifTrue: [self error: self class expiredCartErrorDescription].
+	lastOperationTimestamp := timeSystem now.
+	^aMessage sendTo: proxee.! !
+
+!CartProxy methodsFor: 'initialization' stamp: 'MLNV 11/9/2023 16:57:51'!
+initializeForCatalog: aCatalog andTimeSystem: aTimeSystem
+
+	proxee := Cart acceptingItemsOf: aCatalog.
+	timeSystem := aTimeSystem.
+	lastOperationTimestamp := timeSystem now.! !
+
+"-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
+
+!classDefinition: 'CartProxy class' category: 'TusLibros'!
+CartProxy class
+	instanceVariableNames: ''!
+
+!CartProxy class methodsFor: 'instance creation' stamp: 'MLNV 11/9/2023 16:59:53'!
+forCatalog: aCatalog andTimeSystem: aTimeSystem
+
+	^ self new initializeForCatalog: aCatalog andTimeSystem: aTimeSystem.! !
+
+
+!CartProxy class methodsFor: 'error descriptions' stamp: 'MLNV 11/9/2023 16:50:41'!
+expiredCartErrorDescription
+
+	^'Cart is already expired'.! !
+
+
 !classDefinition: #Cashier category: 'TusLibros'!
 Object subclass: #Cashier
 	instanceVariableNames: 'cart salesBook merchantProcessor creditCard total'
@@ -554,10 +778,12 @@ calculateTotal
 	total := cart total.
 	! !
 
-!Cashier methodsFor: 'checkout - private' stamp: 'HernanWilkinson 6/17/2013 19:07'!
+!Cashier methodsFor: 'checkout - private' stamp: 'MLNV 11/9/2023 15:21:08'!
 createSale
 
-	^ Sale of: total
+	^ Sale 
+		of: total
+		forItems: cart listItems
 ! !
 
 !Cashier methodsFor: 'checkout - private' stamp: 'HernanWilkinson 6/17/2013 19:06'!
@@ -676,17 +902,19 @@ expiringOn: aMonth withIdentifier: anIdentifier andOwner: aName
 
 !classDefinition: #Interface category: 'TusLibros'!
 Object subclass: #Interface
-	instanceVariableNames: 'credentialAuthenticator carts catalog'
+	instanceVariableNames: 'credentialAuthenticator carts catalog merchantProcessor purchases owners timeSystem'
 	classVariableNames: ''
 	poolDictionaries: ''
 	category: 'TusLibros'!
 
-!Interface methodsFor: 'initialization' stamp: 'SC 11/6/2023 20:26:11'!
+!Interface methodsFor: 'initialization' stamp: 'MLNV 11/9/2023 17:06:44'!
 initializeWith: aCredentialAuthenticator 
 
 	credentialAuthenticator := aCredentialAuthenticator.
-	
-	carts := Dictionary new.! !
+	carts := OrderedCollection new.
+	owners := OrderedCollection new.
+	timeSystem := DateAndTime.
+	purchases := Dictionary new.! !
 
 !Interface methodsFor: 'initialization' stamp: 'SC 11/6/2023 21:05:04'!
 initializeWithCatalog: anItemCatalog andAuthenticator: anAuthenticator 
@@ -695,30 +923,62 @@ initializeWithCatalog: anItemCatalog andAuthenticator: anAuthenticator
 	catalog := anItemCatalog.
 	! !
 
+!Interface methodsFor: 'initialization' stamp: 'MLNV 11/9/2023 17:06:25'!
+initializeWithCatalog: aCatalog andAuthenticator: anAuthenticator through: aMerchantProcessor 
 
-!Interface methodsFor: 'operators' stamp: 'MLNV 11/8/2023 23:36:07'!
-addToCartWithId: cartId withIsbn: item withOcurrances: aQuantity
+	self initializeWithCatalog: aCatalog andAuthenticator: anAuthenticator.
+	merchantProcessor := aMerchantProcessor.
+	! !
+
+!Interface methodsFor: 'initialization' stamp: 'MLNV 11/9/2023 17:05:42'!
+initializeWithCatalog: aCatalog andAuthenticator: anAuthenticator through: aMerchantProcessor andTimeSystem: aTimeSystem.
+
+	self initializeWithCatalog: aCatalog andAuthenticator: anAuthenticator through: aMerchantProcessor.
+	timeSystem := aTimeSystem.! !
+
+
+!Interface methodsFor: 'operators' stamp: 'MLNV 11/9/2023 16:17:43'!
+addToCartWithId: cartId item: item withOcurrances: aQuantity
 
 	(carts at: cartId) add: aQuantity of: item
 
 	 
 	! !
 
-!Interface methodsFor: 'operators' stamp: 'MLNV 11/9/2023 12:21:12'!
+!Interface methodsFor: 'operators' stamp: 'MLNV 11/9/2023 16:30:41'!
 checkOut: cartId with: card 
 	
-	| aCart |
+	| aCart aCashier clientId |
+	
+	clientId := (owners at: cartId).
+	
+	(purchases keys includes: (clientId)) ifFalse: [purchases at: clientId put: OrderedCollection new].
 	
 	aCart := carts at: cartId.
+
+	aCashier := Cashier
+		toCheckout: aCart 
+		charging: card
+		throught: merchantProcessor 
+		on: DateAndTime now
+		registeringOn: (purchases at: (clientId)).
+	
+	aCashier checkOut.
+	
+	
+	
+		
+	
 	
 	! !
 
-!Interface methodsFor: 'operators' stamp: 'SC 11/6/2023 21:05:31'!
+!Interface methodsFor: 'operators' stamp: 'MLNV 11/9/2023 17:02:37'!
 createCartWithClientId: aClientId andPassword: aPassword
 
 	(credentialAuthenticator attemptLoginTo: aClientId with: aPassword) ifFalse: [self error: self invalidCredentialsErrorDescription].
 	
-	carts at: (carts size + 1) put: (Cart acceptingItemsOf: 	catalog).
+	carts add: (CartProxy forCatalog: 	catalog andTimeSystem: timeSystem).
+	owners add: aClientId.
 	
 	^ carts size.
 	! !
@@ -729,6 +989,13 @@ listCart: cartId
 	^(carts at: cartId) listItems.
 	
 ! !
+
+!Interface methodsFor: 'operators' stamp: 'MLNV 11/9/2023 16:31:17'!
+listPurchasesOfClient: clientId withPassword: password 
+	
+	^(purchases at: clientId) inject: (Sale of: 0) into:
+		 [:finalSale :aSale | finalSale mergeSale: aSale].
+	! !
 
 
 !Interface methodsFor: 'error descriptions' stamp: 'SC 11/6/2023 20:11:34'!
@@ -752,6 +1019,25 @@ withCatalog: anItemCatalog andAuthenticator: anAuthenticator
 
 	^self new initializeWithCatalog: anItemCatalog andAuthenticator: anAuthenticator ! !
 
+!Interface class methodsFor: 'instance creation' stamp: 'MLNV 11/9/2023 14:46:35'!
+withCatalog: aCatalog andAuthenticator: anAuthenticator through: aMerchantProcessor 
+
+	^self new initializeWithCatalog: aCatalog andAuthenticator: anAuthenticator through: aMerchantProcessor ! !
+
+!Interface class methodsFor: 'instance creation' stamp: 'MLNV 11/9/2023 17:04:54'!
+withCatalog: aCatalog andAuthenticator: anAuthenticator through: aMerchantProcessor andTimeSystem: aTimeSystem
+
+	^self new 
+		initializeWithCatalog: aCatalog 
+		andAuthenticator: anAuthenticator 
+		through: aMerchantProcessor 
+		andTimeSystem: aTimeSystem.! !
+
+
+!Interface class methodsFor: 'error descriptions' stamp: 'MLNV 11/9/2023 16:51:03'!
+expiredCartErrorDescription
+
+	^'Cart is already expired'.! !
 
 !Interface class methodsFor: 'error descriptions' stamp: 'MLNV 11/8/2023 23:35:57'!
 invalidAmountErrorDescription
@@ -766,7 +1052,7 @@ invalidItemErrorDescription
 
 !classDefinition: #Sale category: 'TusLibros'!
 Object subclass: #Sale
-	instanceVariableNames: 'total'
+	instanceVariableNames: 'total itemList clientId'
 	classVariableNames: ''
 	poolDictionaries: ''
 	category: 'TusLibros'!
@@ -777,10 +1063,52 @@ total
 	^ total! !
 
 
-!Sale methodsFor: 'initialization' stamp: 'HernanWilkinson 6/17/2013 18:47'!
+!Sale methodsFor: 'items' stamp: 'MLNV 11/9/2023 15:43:35'!
+itemList
+
+	^itemList.! !
+
+
+!Sale methodsFor: 'private' stamp: 'MLNV 11/9/2023 15:43:28'!
+= aSale
+
+	^total = aSale total and: [itemList = aSale itemList]! !
+
+!Sale methodsFor: 'private' stamp: 'MLNV 11/9/2023 16:03:30'!
+mergeItems: aSale
+	
+	| newItemList |
+	
+	newItemList := itemList.
+	
+	aSale itemList keys do: [:anItem | 
+		newItemList 
+			at: anItem 
+			put: ((newItemList at: anItem ifAbsent: [0]) + (aSale itemList at: anItem))
+		].
+	
+	^newItemList.! !
+
+!Sale methodsFor: 'private' stamp: 'MLNV 11/9/2023 15:56:37'!
+mergeSale: aSale
+
+	^Sale 
+		of: total + aSale total
+		forItems: (self mergeItems: aSale)! !
+
+
+!Sale methodsFor: 'initialization' stamp: 'MLNV 11/9/2023 15:51:53'!
 initializeTotal: aTotal
 
-	total := aTotal ! !
+	total := aTotal .
+	itemList := Dictionary new.! !
+
+!Sale methodsFor: 'initialization' stamp: 'MLNV 11/9/2023 15:25:34'!
+initializeTotal: aTotal  forItems: anItemList
+	
+	itemList := anItemList.
+	total := aTotal.
+	! !
 
 "-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
 
@@ -793,6 +1121,12 @@ of: aTotal
 
 	"should assert total is not negative or 0!!"
 	^self new initializeTotal: aTotal ! !
+
+!Sale class methodsFor: 'instance creation' stamp: 'MLNV 11/9/2023 15:24:46'!
+of: aTotal forItems: anItemList
+
+	"should assert total is not negative or 0!!"
+	^self new initializeTotal: aTotal  forItems: anItemList! !
 
 
 !classDefinition: #StoreTestObjectsFactory category: 'TusLibros'!
