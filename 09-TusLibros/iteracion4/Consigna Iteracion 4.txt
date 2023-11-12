@@ -1,4 +1,4 @@
-La 4ta iteración de "Tus Libros" cuenta de dos partes:
+ La 4ta iteración de "Tus Libros" cuenta de dos partes:
 
 1) Hacer pasar los tests de TusLibros y deducir el patron de diseño a partir de ver el comportamiento que se repite.
 
