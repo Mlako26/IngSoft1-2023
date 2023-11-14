@@ -241,45 +241,88 @@ Object subclass: #TusLibrosClientRestInterface
 	poolDictionaries: ''
 	category: 'TusLibrosREST'!
 
-!TusLibrosClientRestInterface methodsFor: 'requests' stamp: 'natan 11/13/2023 15:41:09'!
+!TusLibrosClientRestInterface methodsFor: 'requests' stamp: 'natan 11/14/2023 00:36:15'!
 add: quantity of: bookIsbn toCartIdentifiedAs: cartId
 
-	| fieldDict resp |
+	| fieldDict |
 
 	fieldDict := Dictionary newFromPairs: {'cartId'. cartId. 'bookIsbn'. bookIsbn. 'bookQuantity'. quantity}.		
 		
+	self makeRequest: '/addToCart' withParameters: fieldDict
+		 ifSuccessDo: [:aResponse | ^(WebUtils jsonDecode: (aResponse readStream))].
+		
+ ! !
 
- 	resp := WebClient htmlSubmit: (self url,'/addToCart') fields: fieldDict.
-	
-	resp isSuccess 
-		ifTrue:[^(WebUtils jsonDecode: ((resp content) readStream))]
-		ifFalse:[^self inform: resp content]! !
+!TusLibrosClientRestInterface methodsFor: 'requests' stamp: 'natan 11/14/2023 00:42:13'!
+add: quantity of: bookIsbn toCartIdentifiedAs: cartId callback: aBlock
+	| fieldDict |
 
-!TusLibrosClientRestInterface methodsFor: 'requests' stamp: 'natan 11/13/2023 15:41:23'!
+	fieldDict := Dictionary newFromPairs: {'cartId'. cartId. 'bookIsbn'. bookIsbn. 'bookQuantity'. quantity}.		
+		
+	self makeRequest: '/addToCart' withParameters: fieldDict
+		 ifSuccessDo: [:aResponse | aBlock value: (WebUtils jsonDecode: (aResponse readStream))].
+		
+ ! !
+
+!TusLibrosClientRestInterface methodsFor: 'requests' stamp: 'natan 11/14/2023 00:20:49'!
 createCartFor: aUser password: aPassword
 
-	| fieldDict resp |
+	| fieldDict |
 	
 	fieldDict := Dictionary newFromPairs: {'clientId'. aUser. 'password'. aPassword}.		
 	
-	resp := WebClient htmlSubmit: (self url,'/createCart') fields: fieldDict.
-	
-	resp isSuccess 
-		ifTrue:[^(WebUtils jsonDecode: ((resp content) readStream))] 
-		ifFalse:[^self inform: resp content]! !
 
-!TusLibrosClientRestInterface methodsFor: 'requests' stamp: 'natan 11/13/2023 15:41:38'!
+	self makeRequest: '/createCart' withParameters: fieldDict
+		 ifSuccessDo: [:aResponse | ^(WebUtils jsonDecode: (aResponse readStream))].
+! !
+
+!TusLibrosClientRestInterface methodsFor: 'requests' stamp: 'natan 11/14/2023 00:42:00'!
+createCartFor: aUser password: aPassword callback: aBlock
+
+	| fieldDict |
+	
+	fieldDict := Dictionary newFromPairs: {'clientId'. aUser. 'password'. aPassword}.		
+	
+
+	self makeRequest: '/createCart' withParameters: fieldDict
+		 ifSuccessDo: [:aResponse | aBlock value: (WebUtils jsonDecode: (aResponse readStream))].
+! !
+
+!TusLibrosClientRestInterface methodsFor: 'requests' stamp: 'natan 11/14/2023 00:20:42'!
 listCart: cartId
 
-	| fieldDict resp |
+	| fieldDict |
 	
 	fieldDict := Dictionary newFromPairs: {'cartId'. cartId. }.		
 	
-	resp := WebClient htmlSubmit: (self url,'/listCart') fields: fieldDict.
+	self makeRequest: '/listCart' withParameters: fieldDict
+		 ifSuccessDo: [:aResponse | ^(WebUtils jsonDecode: (aResponse readStream)) asOrderedCollection]! !
+
+!TusLibrosClientRestInterface methodsFor: 'requests' stamp: 'natan 11/14/2023 00:42:20'!
+listCart: cartId callback: aBlock
+
+	| fieldDict |
 	
-	resp isSuccess 
-		ifTrue:[^(WebUtils jsonDecode: ((resp content) readStream)) asOrderedCollection] 
-		ifFalse:[^self inform: resp content]! !
+	fieldDict := Dictionary newFromPairs: {'cartId'. cartId. }.		
+	
+	self makeRequest: '/listCart' withParameters: fieldDict
+		 ifSuccessDo: [:aResponse | aBlock value: (WebUtils jsonDecode: (aResponse readStream)) asOrderedCollection]! !
+
+!TusLibrosClientRestInterface methodsFor: 'requests' stamp: 'natan 11/14/2023 00:35:48'!
+makeRequest: aRequest withParameters: parameters ifSuccessDo: successBlock
+	| resp|
+	 [
+		resp := WebClient htmlSubmit: (self url,aRequest) fields: parameters.
+	
+		resp isSuccess 
+			ifTrue:(successBlock value: resp content)
+			ifFalse:  [PopUpMenu inform: (resp content)].
+	
+	] fork.
+	
+	
+		
+	! !
 
 
 !TusLibrosClientRestInterface methodsFor: 'initialization' stamp: 'NR 6/9/2022 08:11:33'!
@@ -361,48 +404,45 @@ cartIdsIndex: anIndex
 	! !
 
 
-!TusLibrosClientTestWindowModel methodsFor: 'buttonSelectors' stamp: 'natan 11/13/2023 15:21:14'!
+!TusLibrosClientTestWindowModel methodsFor: 'buttonSelectors' stamp: 'natan 11/14/2023 00:50:53'!
 addToCart
 
 	| cartId bookIsbn |
 
-	self executeAsynchronically:[
-		(self areCartIdAndBookSelected) ifTrue:[
+
+	(self areCartIdAndBookSelected) ifTrue:[
 		cartId := self selectedCartId.
 		bookIsbn := self selectedBook.
-		restInterface add: 1 of: bookIsbn toCartIdentifiedAs: cartId.
-		self triggerEvent: #bookAddedToCart withArguments: (Array with: bookIsbn with: cartId)]
-	]! !
+		restInterface add: 1 of: bookIsbn toCartIdentifiedAs: cartId
+		 callback: [:addedItem | self triggerEvent: #bookAddedToCart withArguments: (Array with: bookIsbn with: cartId)].
+	]
+! !
 
-!TusLibrosClientTestWindowModel methodsFor: 'buttonSelectors' stamp: 'natan 11/13/2023 15:20:57'!
+!TusLibrosClientTestWindowModel methodsFor: 'buttonSelectors' stamp: 'natan 11/14/2023 00:43:54'!
 createCart
 
-	| newCartId |
-	
-	
-	self executeAsynchronically: [
-		newCartId := restInterface createCartFor: 'hernan' password: 'smalltalk'.
+	restInterface createCartFor: 'hernan' password: 'smalltalk'
+	callback: [:newCartId | 
 		cartIds add: newCartId.
 		self triggerEvent: #newCartIdArrived
-	].! !
+	]
+! !
 
-!TusLibrosClientTestWindowModel methodsFor: 'buttonSelectors' stamp: 'natan 11/13/2023 15:19:37'!
-executeAsynchronically: aBlock
-
-	aBlock fork.! !
-
-!TusLibrosClientTestWindowModel methodsFor: 'buttonSelectors' stamp: 'natan 11/13/2023 15:21:54'!
+!TusLibrosClientTestWindowModel methodsFor: 'buttonSelectors' stamp: 'natan 11/14/2023 00:49:29'!
 listCart
 
 	| cartId |
 	
-	self executeAsynchronically: [
-		(self isCartIdSelected) ifTrue: [
-			cartId := self selectedCartId.
-			currentSelectedCartContent := restInterface listCart: cartId.
+	(self isCartIdSelected) ifTrue: [
+		cartId := self selectedCartId.
+		restInterface listCart: cartId callback:
+		 [:cartContent  |
+			currentSelectedCartContent := cartContent. 
 			self triggerEvent: #newCurrentSelectedCartContentArrived with: cartId 
 		].
-	].! !
+		
+	].
+! !
 
 
 !TusLibrosClientTestWindowModel methodsFor: 'initialization' stamp: 'NR 6/9/2022 08:13:11'!

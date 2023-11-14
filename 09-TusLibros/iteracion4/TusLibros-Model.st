@@ -487,6 +487,37 @@ debit: anAmount from: aCreditCard
 	self subclassResponsibility ! !
 
 
+!classDefinition: #Promise category: 'TusLibros-Model'!
+Object subclass: #Promise
+	instanceVariableNames: 'value semaphore'
+	classVariableNames: ''
+	poolDictionaries: ''
+	category: 'TusLibros-Model'!
+
+!Promise methodsFor: 'as yet unclassified' stamp: 'natan 11/14/2023 00:02:55'!
+initializeOf: aBlock
+	semaphore := Semaphore new.
+	[value := aBlock value. semaphore signal.] fork.! !
+
+!Promise methodsFor: 'as yet unclassified' stamp: 'natan 11/13/2023 23:48:36'!
+value
+	semaphore wait.
+	semaphore signal.
+	
+	^value.
+	! !
+
+"-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
+
+!classDefinition: 'Promise class' category: 'TusLibros-Model'!
+Promise class
+	instanceVariableNames: ''!
+
+!Promise class methodsFor: 'as yet unclassified' stamp: 'natan 11/14/2023 00:01:50'!
+of: aBlock
+	^(self new) initializeOf: aBlock! !
+
+
 !classDefinition: #Sale category: 'TusLibros-Model'!
 Object subclass: #Sale
 	instanceVariableNames: 'customer ticket'
@@ -753,31 +784,24 @@ salesBook
 	^ salesBook! !
 
 
-!TusLibrosSystemFacade methodsFor: 'private' stamp: 'natan 11/12/2023 20:14:59'!
+!TusLibrosSystemFacade methodsFor: 'private' stamp: 'natan 11/14/2023 00:00:44'!
 bookPerformance: anItem
 
 	| bookPerformance totalMoney totalSales |
 
 	bookPerformance := Dictionary new.
 	
-	self execute: [totalSales := self totalSalesOf: anItem.] inParallelWith: [totalMoney := self totalMoneyRaisedBy: anItem.].
+	totalSales := Promise of: [self totalSalesOf: anItem].
+	totalMoney := self totalMoneyRaisedBy: anItem.
 	
-	bookPerformance at: 'quantity' put: totalSales.
+	bookPerformance at: 'quantity' put: totalSales value.
 	bookPerformance at: 'total' put: totalMoney.
-	bookPerformance at: 'summary' put: anItem,' was selled ',totalSales asString, ' times and raised a total amount of money equal to: ', totalMoney asString.
+	bookPerformance at: 'summary' put: anItem,' was selled ',totalSales value asString, ' times and raised a total amount of money equal to: ', totalMoney asString.
 	
 	^bookPerformance
 	
 
 ! !
-
-!TusLibrosSystemFacade methodsFor: 'private' stamp: 'natan 11/12/2023 20:13:54'!
-execute: aBlock inParallelWith: anotherBlock	
-	|readySemaphore|
-	readySemaphore := Semaphore new. 
-	[aBlock value. readySemaphore signal] fork.
-	anotherBlock value.
-	readySemaphore wait.! !
 
 !TusLibrosSystemFacade methodsFor: 'private' stamp: 'HAW 7/23/2020 15:34:54'!
 list: aSale on: quantitiesByItem 
@@ -794,18 +818,19 @@ salesDoneBy: aUser
 	"Esto es un indicio de que por ahi conviene empezar a pensar en modelar un SaleBook - Hernan"
 	^ salesBook select: [ :aSale | aSale wasDoneBy: aUser ]! !
 
-!TusLibrosSystemFacade methodsFor: 'private' stamp: 'natan 11/12/2023 20:15:59'!
+!TusLibrosSystemFacade methodsFor: 'private' stamp: 'natan 11/14/2023 00:00:55'!
 storePerformance
 
 	| totalMoney totalSales performance |
 	
 	performance := Dictionary new.
 	
-	self execute: [totalSales := self totalSales] inParallelWith: [totalMoney := self totalMoneyRaised].
+	totalSales := Promise of: [self totalSales].
+	totalMoney := self totalMoneyRaised.
 	
-	performance at: 'quantity' put: totalSales.
+	performance at: 'quantity' put: totalSales value.
 	performance at: 'total' put: totalMoney.
-	performance at: 'summary' put: 'The store selled a total of ',totalSales asString, ' books and raised a total amount of money equal to: ', totalMoney asString.
+	performance at: 'summary' put: 'The store selled a total of ',totalSales value asString, ' books and raised a total amount of money equal to: ', totalMoney asString.
 	
 	^performance
 	
