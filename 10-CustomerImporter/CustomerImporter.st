@@ -15,43 +15,6 @@ assertDataBaseIncludes: aCustomer
 	^customers anyOne.
 	! !
 
-!ImportTest methodsFor: 'as yet unclassified' stamp: 'natan 11/15/2023 15:46:02'!
-importCustomers
-
-	"
-	self importCustomers
-	"
-	| inputStream  newCustomer line |
-
-	inputStream := UniFileStream new open: 'input.txt' forWrite: false.
-
-	line := inputStream nextLine.
-	[ line notNil ] whileTrue: [
-		(line beginsWith: 'C') ifTrue: [ | customerData |
-			customerData := line findTokens: $,.
-			newCustomer := Customer new.
-			newCustomer firstName: customerData second.
-			newCustomer lastName: customerData third.
-			newCustomer identificationType: customerData fourth.
-			newCustomer identificationNumber: customerData fifth.
-			session persist: newCustomer ].
-
-		(line beginsWith: 'A') ifTrue: [ | addressData newAddress |
-			addressData := line findTokens: $,.
-			newAddress := Address new.
-			newCustomer addAddress: newAddress.
-			newAddress streetName: addressData second.
-			newAddress streetNumber: addressData third asNumber .
-			newAddress town: addressData fourth.
-			newAddress zipCode: addressData fifth asNumber .
-			newAddress province: addressData sixth .
-			].
-
-		line := inputStream nextLine. ].
-
-	inputStream close.
-	! !
-
 !ImportTest methodsFor: 'as yet unclassified' stamp: 'MN 11/13/2023 20:29:48'!
 setUp
 
@@ -64,59 +27,48 @@ tearDown
 	session commit.
 	session close! !
 
-!ImportTest methodsFor: 'as yet unclassified' stamp: 'natan 11/15/2023 15:41:08'!
+!ImportTest methodsFor: 'as yet unclassified' stamp: 'natan 11/15/2023 16:42:55'!
 test01InputFileCustomersAreSavedInDataBase
 	
-	| pepe addressSanMartin addressMaipu juan addressAlem |
+	| pepe juan |
 	
-	self importCustomers .
+	pepe := Customer 
+		withFirstName: 'Pepe' 
+		lastName: 'Sanchez'  
+		idType: 'D' 
+		idNumber: '22333444'. 
+	
+	Address 
+		withStreetName: 'San Martin'
+		streetNumber: 3322 
+		town: 'Olivos'
+		zipCode: 1636 
+		province: 'BsAs' 
+		ofCustomer: pepe. 
+	
+	Address 
+		withStreetName: 'Maipu' 
+		streetNumber: 888 
+		town: 'Florida' 
+		zipCode: 1122 
+		province: 'Buenos Aires'
+		ofCustomer: pepe. 
 
-	pepe := Customer withFirstName: 'Pepe' lastName: 'Sanchez'  idType: 'D' idNumber: '22333444'. 
-	
-	addressSanMartin := Address withStreetName: 'San Martin' streetNumber: 3322 town: 'Olivos' zipCode: 1636 province: 'BsAs'. 
-	
-	addressMaipu := Address withStreetName: 'Maipu' streetNumber: 888 town: 'Florida' zipCode: 1122 province: 'Buenos Aires'. 
-	
-	pepe addAddress: addressSanMartin.
-	pepe addAddress: addressMaipu.	
-	
-	juan := Customer withFirstName: 'Juan' lastName: 'Perez'  idType: 'C' idNumber: '23-25666777-9'. 
+	juan := Customer 
+		withFirstName: 'Juan' 
+		lastName: 'Perez'  
+		idType: 'C' 
+		idNumber: '23-25666777-9'. 
 
-	addressAlem := Address withStreetName: 'Alem' streetNumber: 1122 town: 'CABA' zipCode: 1001 province: 'CABA'. 
+	Address 
+		withStreetName: 'Alem' 
+		streetNumber: 1122 
+		town: 'CABA' 
+		zipCode: 1001 
+		province: 'CABA'
+		ofCustomer: juan.	
 	
-	juan addAddress: addressAlem.
-	
-	self assertDataBaseIncludes: juan.
-	self assertDataBaseIncludes: pepe.
-	
-	
-	
-	
-	
-	! !
-
-!ImportTest methodsFor: 'as yet unclassified' stamp: 'natan 11/15/2023 15:41:34'!
-test02InputFileAddressesAreSavedInDataBase
-	
-	| pepe addressSanMartin addressMaipu juan addressAlem |
-	
-	self importCustomers .
-
-	pepe := Customer withFirstName: 'Pepe' lastName: 'Sanchez'  idType: 'D' idNumber: '22333444'. 
-	
-	addressSanMartin := Address withStreetName: 'San Martin' streetNumber: 3322 town: 'Olivos' zipCode: 1636 province: 'BsAs'. 
-	
-	addressMaipu := Address withStreetName: 'Maipu' streetNumber: 888 town: 'Florida' zipCode: 1122 province: 'Buenos Aires'. 
-	
-	pepe addAddress: addressSanMartin.
-	pepe addAddress: addressMaipu.	
-	
-	juan := Customer withFirstName: 'Juan' lastName: 'Perez'  idType: 'C' idNumber: '23-25666777-9'. 
-
-	addressAlem := Address withStreetName: 'Alem' streetNumber: 1122 town: 'CABA' zipCode: 1001 province: 'CABA'. 
-	
-	juan addAddress: addressAlem.
-	
+	(CustomerImporter for: session from: (UniFileStream new open: 'input.txt' forWrite: false)) import.
 	self assertDataBaseIncludes: juan.
 	self assertDataBaseIncludes: pepe.
 	
@@ -215,6 +167,13 @@ Address class
 withStreetName: streetName streetNumber: streetNumber town: town zipCode: zipCode province: province
 	^ self new initializeWithStreetName: streetName streetNumber: streetNumber town: town zipCode: zipCode province: province.! !
 
+!Address class methodsFor: 'as yet unclassified' stamp: 'natan 11/15/2023 16:39:24'!
+withStreetName: streetName streetNumber: streetNumber town: town zipCode: zipCode province: province ofCustomer: aCustomer
+	| newAddress | 
+	newAddress := self new initializeWithStreetName: streetName streetNumber: streetNumber town: town zipCode: zipCode province: province.
+	aCustomer addAddress: newAddress.
+	^newAddress.! !
+
 
 !classDefinition: #Customer category: 'CustomerImporter'!
 Object subclass: #Customer
@@ -309,6 +268,65 @@ withFirstName: aFirstName lastName: aLastName idType: anIdType idNumber: anIdNum
 	newCustomer identificationNumber: anIdNumber.
 	
 	^newCustomer.! !
+
+
+!classDefinition: #CustomerImporter category: 'CustomerImporter'!
+Object subclass: #CustomerImporter
+	instanceVariableNames: 'dataBaseSession inputStream'
+	classVariableNames: ''
+	poolDictionaries: ''
+	category: 'CustomerImporter'!
+
+!CustomerImporter methodsFor: 'initialization' stamp: 'natan 11/15/2023 16:31:51'!
+initializeFor: aSession from: anInputStream
+	dataBaseSession := aSession.
+	inputStream := anInputStream.! !
+
+
+!CustomerImporter methodsFor: 'evaluating' stamp: 'natan 11/15/2023 16:31:51'!
+import 
+
+	"
+	self importCustomers
+	"
+	| newCustomer line |
+
+	line := inputStream nextLine.
+	[ line notNil ] whileTrue: [
+		(line beginsWith: 'C') ifTrue: [ | customerData |
+			customerData := line findTokens: $,.
+			newCustomer := Customer new.
+			newCustomer firstName: customerData second.
+			newCustomer lastName: customerData third.
+			newCustomer identificationType: customerData fourth.
+			newCustomer identificationNumber: customerData fifth.
+			dataBaseSession persist: newCustomer ].
+
+		(line beginsWith: 'A') ifTrue: [ | addressData newAddress |
+			addressData := line findTokens: $,.
+			newAddress := Address new.
+			newCustomer addAddress: newAddress.
+			newAddress streetName: addressData second.
+			newAddress streetNumber: addressData third asNumber .
+			newAddress town: addressData fourth.
+			newAddress zipCode: addressData fifth asNumber .
+			newAddress province: addressData sixth .
+			].
+
+		line := inputStream nextLine. ].
+
+	inputStream close.
+	! !
+
+"-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
+
+!classDefinition: 'CustomerImporter class' category: 'CustomerImporter'!
+CustomerImporter class
+	instanceVariableNames: ''!
+
+!CustomerImporter class methodsFor: 'instance creation' stamp: 'natan 11/15/2023 16:31:51'!
+for: aSession from: anInputStream
+	^self new initializeFor: aSession from: anInputStream! !
 
 
 !classDefinition: #DataBaseSession category: 'CustomerImporter'!
