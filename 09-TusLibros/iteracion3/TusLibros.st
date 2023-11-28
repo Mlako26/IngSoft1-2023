@@ -519,10 +519,10 @@ test11InterfaceSeparatesPurchasesOfDifferentClients
 	
 ! !
 
-!InterfaceTest methodsFor: 'tests' stamp: 'MLNV 11/9/2023 17:12:37'!
+!InterfaceTest methodsFor: 'tests' stamp: 'MLNV 11/28/2023 16:40:00'!
 test12CantAddItemOnACartAfter30MinutesOfInactivity
 
-	| interface cartId clientID password item|
+	| interface cartId clientID password item |
 	
 	time := DateAndTime now.
 	
@@ -600,6 +600,55 @@ test14CantListPurchasesOfAnInvalidClient
 	
 	
 	
+! !
+
+!InterfaceTest methodsFor: 'tests' stamp: 'MLNV 11/28/2023 16:48:18'!
+test15CartTimersWorkIndependentlyAsExpected
+
+	| interface firstCartId clientID password item secondCartId expected |
+	
+	time := DateAndTime now.
+	
+	interface := Interface 
+		withCatalog: testObjectsFactory defaultCatalog
+		andAuthenticator: self
+		through: self
+		andTimeSystem: self.
+		
+	clientID := 'pepeBueno'.
+	password := 'pepito'.
+	item := testObjectsFactory itemSellByTheStore.	
+	
+	expected := Dictionary new.
+	expected at: testObjectsFactory itemSellByTheStore put: 1.
+	
+	firstCartId := interface createCartWithClientId: clientID andPassword: password.
+	
+	time := time + 2 minutes.
+	
+	secondCartId := interface createCartWithClientId: clientID andPassword: password.
+	
+	time := time + 28 minutes. 
+	"El primer carrito pasaron 2+28 = 30 minutos, pero para el segundo solo pasaron 28 minutos"
+	
+	interface addToCartWithId: secondCartId item: testObjectsFactory itemSellByTheStore withOcurrances: 1.
+	
+	self 
+		should: [interface addToCartWithId: firstCartId item: item withOcurrances: 1]
+		raise: Error - MessageNotUnderstood 
+		withExceptionDo: [:anError | 
+				self assert: anError messageText = Interface expiredCartErrorDescription.
+				self assert: (interface listCart: secondCartId) equals: expected.
+			].
+		
+	time := time + 30 minutes. "Pasa la media hora del segundo carrito "
+	
+	self 
+		should: [interface addToCartWithId: secondCartId item: item withOcurrances: 1]
+		raise: Error - MessageNotUnderstood 
+		withExceptionDo: [:anError | 
+				self assert: anError messageText = Interface expiredCartErrorDescription.
+			].
 ! !
 
 
@@ -989,7 +1038,6 @@ listPurchasesOfClient: aClientId withPassword: aPassword
 	^(purchases at: aClientId) inject: (Sale of: 0) into:
 		 [:finalSale :aSale | finalSale mergeSale: aSale].
 	! !
-
 
 "-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
 
