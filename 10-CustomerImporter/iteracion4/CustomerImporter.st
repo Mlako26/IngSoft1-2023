@@ -1125,7 +1125,7 @@ newIdFor: anObject
 	^id! !
 
 
-!DataBaseSession methodsFor: 'persistance' stamp: 'MLNV 11/26/2023 21:05:42'!
+!DataBaseSession methodsFor: 'persistance' stamp: 'MLNV 1/24/2024 19:51:03'!
 persist: anObject
 
 	| table |
@@ -1135,7 +1135,7 @@ persist: anObject
 	self delay.
 	
 	table := self tableOfType: anObject class.
-	self defineIdOf: anObject.
+	"self defineIdOf: anObject."
 	table add: anObject.
 	self persistRelationsOf: anObject.
 ! !
@@ -1324,7 +1324,7 @@ firstName
 	^firstName ! !
 
 
-!Party methodsFor: 'identification' stamp: 'MLNV 11/26/2023 21:05:45'!
+!Party methodsFor: 'identification' stamp: 'MLNV 1/24/2024 19:46:35'!
 identificationNumber
 
 	^identificationNumber ! !
@@ -1348,7 +1348,7 @@ lastName
 	^lastName ! !
 
 
-!Customer methodsFor: 'initialization' stamp: 'MLNV 11/26/2023 21:16:24'!
+!Customer methodsFor: 'initialization' stamp: 'MLNV 1/24/2024 19:54:06'!
 initializeWithFirstName: aFirstName lastName: aLastName idType: anIdType idNumber: anIdNumber.
 		
 	firstName := aFirstName.
@@ -1399,7 +1399,7 @@ isCustomersEmpty
 	^customers isEmpty ! !
 
 
-!Supplier methodsFor: 'initialization' stamp: 'MLNV 11/26/2023 21:16:55'!
+!Supplier methodsFor: 'initialization' stamp: 'MLNV 1/24/2024 19:54:30'!
 initializeWithFirstName: aFirstName idType: anIdType idNumber: anIdNumber.
 		
 	firstName := aFirstName.
